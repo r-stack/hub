@@ -11,36 +11,6 @@ try {
 }
 var context = new SupportedAudioContext();
 
-var buffer;
-(function  () {
-    var request = new XMLHttpRequest();
-    request.open('GET', SOUND_URL, true);
-    request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
-    request.send();
-    request.onload = function () {
-        // contextにArrayBufferを渡し、decodeさせる
-        context.decodeAudioData(request.response, function (buf) {
-            buffer = buf;
-        });
-    };
-})();
-
-
-
-
-
-
-$('#test1').on('click', function (e) {
-    e.preventDefault();
-
-    var source = context.createBufferSource();
-    source.buffer = buffer;
-    source.connect(context.destination);
-    
-    source.start(0);
-});
-
-
 
 var source;
 function play(targets){
@@ -50,22 +20,29 @@ function play(targets){
     
     var url = '/sound/' + targets[0] + '.mp3';
     
+    var buffer;
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
     request.send();
+    
+    var d = new $.Deferred;
     request.onload = function () {
         // contextにArrayBufferを渡し、decodeさせる
         context.decodeAudioData(request.response, function (buf) {
             buffer = buf;
+            d.resolve();
         });
     };
     
-    source = context.createBufferSource();
-    source.buffer = buffer;
-    source.connect(context.destination);
-    
-    source.start(0);
+    d.promise().done(function(){
+        source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        
+        source.start(0);
+        
+    });
     
 }
 
