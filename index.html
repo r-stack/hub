@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">Hub</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h4>課題曲: 国家</h4>
+                </div>
+            </div>
+            <div class="row">
+                <ul class="collapsible" data-collapsible="expandable">
+                    <li>
+                        <div class="collapsible-header active">
+                            <i class="material-icons">settings_voice</i>ボーカル
+                            <a href="#!" class="secondary-content red-text text-accent-3"><i class="material-icons">album</i></a>
+                        </div>
+                        <div class="collapsible-body">
+                            <ul class="collection">
+                                <li class="collection-item">
+                                    <div class="row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="v1" />
+                                            <label for="v1"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            hanako
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="collection-item">
+                                    <div class="row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="v2" />
+                                            <label for="v2"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            sabro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <li>
+                            <div class="collapsible-header active">
+                                <i class="material-icons">place</i>ギター
+                                <a href="#!" class="secondary-content"><i class="material-icons red-text text-accent-3">album</i></a>
+                            </div>
+                            <div class="collapsible-body">
+                                <ul class="collection">
+                                    <li class="collection-item">
+                                        <div class="row">
+                                            <div class="col s1">
+                                                <input type="checkbox" id="v1" />
+                                                <label for="v1"></label>
+                                            </div>
+                                            <div class="col s9">
+                                                hanako
+                                            </div>
+                                            <div class="col s2">
+                                                <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="collection-item">
+                                        <div class="row">
+                                            <div class="col s1">
+                                                <input type="checkbox" id="v2" />
+                                                <label for="v2"></label>
+                                            </div>
+                                            <div class="col s9">
+                                                sabro
+                                            </div>
+                                            <div class="col s2">
+                                                <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-header active">
+                                <i class="material-icons">whatshot</i>ドラム
+                                <a href="#!" class="secondary-content"><i class="material-icons red-text text-accent-3">album</i></a>
+                            </div>
+                            <div class="collapsible-body"><span>リスト</span></div>
+                        </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.collapsible').collapsible();
+        });
+    </script>
+</body>
+
+</html>
