@@ -2,3 +2,7 @@
     vertical-align: middle;
     margin-right: 10px;
 }
+
+.nomargin{
+    margin-bottom: 0px;
+}
