@@ -27,8 +27,8 @@
                 </div>
                 <div class="card col s3">
                     <div class="card-content">
-                        <a class="btn-floating btn-small waves-effect waves-light teal" onclick="play(['v1', 'g1', 'd1'])"><i class="material-icons">play_arrow</i></a>
-                        <a class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">stop</i></a>
+                        <a class="btn-floating btn-small waves-effect waves-light teal" onclick="playSelected()"><i class="material-icons">play_arrow</i></a>
+                        <a class="btn-floating btn-small waves-effect waves-light red" onclick="stop()"><i class="material-icons">stop</i></a>
                     </div>
                 </div>
 
@@ -44,38 +44,43 @@
                             <ul class="collection">
                                 <li class="collection-item row">
                                     <div class="col s1">
-                                        <input type="checkbox" id="v1" />
+                                        <input type="checkbox" id="v1" class="check" value="v1"/>
                                         <label for="v1"></label>
                                     </div>
                                     <div class="col s9">
                                         hanako
                                     </div>
                                     <div class="col s2">
-                                        <a href="#!" class="secondary-content" onclick="play(['v1']);"><i class="material-icons">play_arrow</i></a>
+                                        <div class="secondary-content">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['v1']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
                                     </div>
                                 </li>
                                 <li class="collection-item row">
 
                                     <div class="col s1">
-                                        <input type="checkbox" id="v2" />
+                                        <input type="checkbox" id="v2" class="check" value="v2"/>
                                         <label for="v2"></label>
                                     </div>
                                     <div class="col s9">
                                         sabro
                                     </div>
                                     <div class="col s2">
+                                        <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
                                         <a href="#!" class="secondary-content" onclick="play(['v2']);"><i class="material-icons">play_arrow</i></a>
                                     </div>
                                 </li>
                                 <li class="collection-item row">
                                     <div class="col s1">
-                                        <input type="checkbox" id="v3" />
+                                        <input type="checkbox" id="v3" class="check" value="v3"/>
                                         <label for="v3"></label>
                                     </div>
                                     <div class="col s9">
                                         jiro
                                     </div>
                                     <div class="col s2">
+                                        <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
                                         <a href="#!" class="secondary-content" onclick="play(['v3']);"><i class="material-icons">play_arrow</i></a>
                                     </div>
                                 </li>
@@ -90,38 +95,41 @@
                                 <ul class="collection">
                                     <li class="collection-item row">
                                         <div class="col s1">
-                                            <input type="checkbox" id="g1" />
+                                            <input type="checkbox" id="g1" class="check" value="g1"/>
                                             <label for="g1"></label>
                                         </div>
                                         <div class="col s9">
                                             hanako
                                         </div>
                                         <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
                                             <a href="#!" class="secondary-content" onclick="play(['g1']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                     <li class="collection-item row">
 
                                         <div class="col s1">
-                                            <input type="checkbox" id="g2" />
+                                            <input type="checkbox" id="g2" class="check" value="g2"/>
                                             <label for="g2"></label>
                                         </div>
                                         <div class="col s9">
                                             sabro
                                         </div>
                                         <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
                                             <a href="#!" class="secondary-content" onclick="play(['g2']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                     <li class="collection-item row">
                                         <div class="col s1">
-                                            <input type="checkbox" id="g3" />
+                                            <input type="checkbox" id="g3" class="check" value="g3"/>
                                             <label for="g3"></label>
                                         </div>
                                         <div class="col s9">
                                             jiro
                                         </div>
                                         <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
                                             <a href="#!" class="secondary-content" onclick="play(['g3']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
@@ -133,7 +141,50 @@
                                 <img src="img/drum.svg" width="24" height="24" class="insticon">ドラム
                                 <img src="img/rec.svg" width="24" height="24" class="insticon">
                             </div>
-                            <div class="collapsible-body"><span>リスト</span></div>
+                            <div class="collapsible-body">
+                                <ul class="collection">
+                                    <li class="collection-item row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d1" class="check" value="d1"/>
+                                            <label for="d1"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            hanako
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d1']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                    <li class="collection-item row">
+
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d2" class="check" value="d2"/>
+                                            <label for="d2"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            sabro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d2']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                    <li class="collection-item row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d3" class="check" value="d3"/>
+                                            <label for="d3"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            jiro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d3']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
                 </ul>
             </div>
@@ -148,6 +199,14 @@
         $(document).ready(function () {
             $('.collapsible').collapsible();
         });
+
+        function playSelected() {
+            const checked = $('[class="check"]:checked').map(function () {
+                //$(this)でjQueryオブジェクトが取得できる。val()で値をvalue値を取得。
+                return $(this).val();
+            }).get();
+            play(checked);
+        }
     </script>
 </body>
 
