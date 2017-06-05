@@ -18,10 +18,20 @@
     </header>
     <main>
         <div class="container">
-            <div class="row">
-                <div class="col s12">
-                    <h4>課題曲: コアラのマーチ</h4>
+            <div class="row valign-wrapper">
+
+                <div class="col s9">
+                    <h5>
+                        課題曲: コアラのマーチ
+                    </h5>
                 </div>
+                <div class="card col s3">
+                    <div class="card-content">
+                        <a class="btn-floating btn-small waves-effect waves-light teal" onclick="play(['v1', 'g1', 'd1'])"><i class="material-icons">play_arrow</i></a>
+                        <a class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">stop</i></a>
+                    </div>
+                </div>
+
             </div>
             <div class="row">
                 <ul class="collapsible" data-collapsible="expandable">
@@ -41,7 +51,7 @@
                                         hanako
                                     </div>
                                     <div class="col s2">
-                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                        <a href="#!" class="secondary-content" onclick="play(['v1']);"><i class="material-icons">play_arrow</i></a>
                                     </div>
                                 </li>
                                 <li class="collection-item row">
@@ -54,7 +64,7 @@
                                         sabro
                                     </div>
                                     <div class="col s2">
-                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                        <a href="#!" class="secondary-content" onclick="play(['v2']);"><i class="material-icons">play_arrow</i></a>
                                     </div>
                                 </li>
                                 <li class="collection-item row">
@@ -66,7 +76,7 @@
                                         jiro
                                     </div>
                                     <div class="col s2">
-                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                        <a href="#!" class="secondary-content" onclick="play(['v3']);"><i class="material-icons">play_arrow</i></a>
                                     </div>
                                 </li>
                             </ul>
@@ -87,7 +97,7 @@
                                             hanako
                                         </div>
                                         <div class="col s2">
-                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['g1']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                     <li class="collection-item row">
@@ -100,7 +110,7 @@
                                             sabro
                                         </div>
                                         <div class="col s2">
-                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['g2']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                     <li class="collection-item row">
@@ -112,7 +122,7 @@
                                             jiro
                                         </div>
                                         <div class="col s2">
-                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['g3']);"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                 </ul>
@@ -133,6 +143,7 @@
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+    <script src="index.js"></script>
     <script>
         $(document).ready(function () {
             $('.collapsible').collapsible();
