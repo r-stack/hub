@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -19,23 +20,68 @@
         <div class="container">
             <div class="row">
                 <div class="col s12">
-                    <h4>課題曲: 国家</h4>
+                    <h4>課題曲: コアラのマーチ</h4>
                 </div>
             </div>
             <div class="row">
                 <ul class="collapsible" data-collapsible="expandable">
                     <li>
                         <div class="collapsible-header active">
-                            <i class="material-icons">settings_voice</i>ボーカル
-                            <a href="#!" class="secondary-content red-text text-accent-3"><i class="material-icons">album</i></a>
+                            <img src="img/mic.svg" width="24" height="24" class="insticon">ボーカル
+                            <img src="img/rec.svg" width="24" height="24" class="insticon">
                         </div>
                         <div class="collapsible-body">
                             <ul class="collection">
-                                <li class="collection-item">
-                                    <div class="row">
+                                <li class="collection-item row">
+                                    <div class="col s1">
+                                        <input type="checkbox" id="v1" />
+                                        <label for="v1"></label>
+                                    </div>
+                                    <div class="col s9">
+                                        hanako
+                                    </div>
+                                    <div class="col s2">
+                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                    </div>
+                                </li>
+                                <li class="collection-item row">
+
+                                    <div class="col s1">
+                                        <input type="checkbox" id="v2" />
+                                        <label for="v2"></label>
+                                    </div>
+                                    <div class="col s9">
+                                        sabro
+                                    </div>
+                                    <div class="col s2">
+                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                    </div>
+                                </li>
+                                <li class="collection-item row">
+                                    <div class="col s1">
+                                        <input type="checkbox" id="v3" />
+                                        <label for="v3"></label>
+                                    </div>
+                                    <div class="col s9">
+                                        jiro
+                                    </div>
+                                    <div class="col s2">
+                                        <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <li>
+                            <div class="collapsible-header active">
+                                <img src="img/guitar.svg" width="24" height="24" class="insticon">ギター
+                                <img src="img/rec.svg" width="24" height="24" class="insticon">
+                            </div>
+                            <div class="collapsible-body">
+                                <ul class="collection">
+                                    <li class="collection-item row">
                                         <div class="col s1">
-                                            <input type="checkbox" id="v1" />
-                                            <label for="v1"></label>
+                                            <input type="checkbox" id="g1" />
+                                            <label for="g1"></label>
                                         </div>
                                         <div class="col s9">
                                             hanako
@@ -43,13 +89,12 @@
                                         <div class="col s2">
                                             <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
                                         </div>
-                                    </div>
-                                </li>
-                                <li class="collection-item">
-                                    <div class="row">
+                                    </li>
+                                    <li class="collection-item row">
+
                                         <div class="col s1">
-                                            <input type="checkbox" id="v2" />
-                                            <label for="v2"></label>
+                                            <input type="checkbox" id="g2" />
+                                            <label for="g2"></label>
                                         </div>
                                         <div class="col s9">
                                             sabro
@@ -57,43 +102,17 @@
                                         <div class="col s2">
                                             <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
                                         </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                        <li>
-                            <div class="collapsible-header active">
-                                <i class="material-icons">place</i>ギター
-                                <a href="#!" class="secondary-content"><i class="material-icons red-text text-accent-3">album</i></a>
-                            </div>
-                            <div class="collapsible-body">
-                                <ul class="collection">
-                                    <li class="collection-item">
-                                        <div class="row">
-                                            <div class="col s1">
-                                                <input type="checkbox" id="v1" />
-                                                <label for="v1"></label>
-                                            </div>
-                                            <div class="col s9">
-                                                hanako
-                                            </div>
-                                            <div class="col s2">
-                                                <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
-                                            </div>
-                                        </div>
                                     </li>
-                                    <li class="collection-item">
-                                        <div class="row">
-                                            <div class="col s1">
-                                                <input type="checkbox" id="v2" />
-                                                <label for="v2"></label>
-                                            </div>
-                                            <div class="col s9">
-                                                sabro
-                                            </div>
-                                            <div class="col s2">
-                                                <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
-                                            </div>
+                                    <li class="collection-item row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="g3" />
+                                            <label for="g3"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            jiro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content"><i class="material-icons">play_arrow</i></a>
                                         </div>
                                     </li>
                                 </ul>
@@ -101,8 +120,8 @@
                         </li>
                         <li>
                             <div class="collapsible-header active">
-                                <i class="material-icons">whatshot</i>ドラム
-                                <a href="#!" class="secondary-content"><i class="material-icons red-text text-accent-3">album</i></a>
+                                <img src="img/drum.svg" width="24" height="24" class="insticon">ドラム
+                                <img src="img/rec.svg" width="24" height="24" class="insticon">
                             </div>
                             <div class="collapsible-body"><span>リスト</span></div>
                         </li>
