@@ -1,3 +1,8 @@
+.title{
+    margin-left: 20px;
+    font-size: 2em;
+}
+
 .insticon{
     vertical-align: middle;
     margin-right: 10px;
@@ -5,4 +10,28 @@
 
 .nomargin{
     margin-bottom: 0px;
+}
+
+.card-panel{
+    padding: 16px;
+}
+.card-panel .row{
+    margin-bottom: 0px;
+}
+.name{
+    font-size: 1.5em;
+}
+
+
+.favo{
+    color: #ffffff;
+    font-size: 0.8em;
+    width:24px;
+    height:24px;
+    background-image:url(img/favo.svg);
+    background-size:100%;
+}
+
+.favo div{
+    margin: 0px auto;
 }

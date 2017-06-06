@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
     <link rel="stylesheet" href="style.css">
@@ -12,140 +13,137 @@
     <header>
         <nav>
             <div class="nav-wrapper">
-                <a href="#" class="brand-logo">Hub</a>
+                <a href="#" class="title">Hub</a>
+                <ul id="nav-mobile" class="right">
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light light-blue" onclick="playSelected()"><i class="material-icons">pause</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light teal" onclick="playSelected()"><i class="material-icons">play_arrow</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light amber" onclick="stop()"><i class="material-icons">stop</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a href="#modal1" class="modal-trigger btn-floating btn-small waves-effect waves-light red"><i class="material-icons">settings_voice</i></a>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
     <main>
         <div class="container">
-            <div class="row valign-wrapper">
-
-                <div class="col s9">
+            <div class="row valign-wrapper nomargin">
+                <div class="col s12 center">
                     <h5>
                         課題曲: コアラのマーチ
                     </h5>
                 </div>
-                <div class="card col s3">
-                    <div class="card-content">
-                        <div class="row nomargin">
-                            <div class="col s6 center">
-                                <a class="btn-floating btn-small waves-effect waves-light teal" onclick="playSelected()"><i class="material-icons">play_arrow</i></a>
-                            </div>
-                            <div class="col s6 center">
-                                <a class="btn-floating btn-small waves-effect waves-light red" onclick="stop()"><i class="material-icons">stop</i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
             <div class="row">
                 <ul class="collapsible" data-collapsible="expandable">
                     <li>
                         <div class="collapsible-header active">
                             <img src="img/mic.svg" width="24" height="24" class="insticon">ボーカル
-                            <a href="#!" class="secondary-content" onclick="rec('v')"><img src="img/rec.svg" width="24" height="24" class="insticon"></a>
                         </div>
                         <div class="collapsible-body">
-                            <ul class="collection">
-                                <li class="collection-item row">
+                            <!-- ここから一人分 -->
+                            <div class="card-panel">
+                                <div class="row valign-wrapper">
                                     <div class="col s1">
                                         <input type="checkbox" id="v1" class="check" value="v1" />
                                         <label for="v1"></label>
                                     </div>
-                                    <div class="col s9">
+                                    <div class="col s2 m1">
+                                        <img src="img/hanako.png" alt="hanako" class="circle responsive-img">
+                                    </div>
+                                    <div class="name col s4">
                                         hanako
                                     </div>
-                                    <div class="col s2">
-                                        <div class="secondary-content">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['v1']);"><i class="material-icons">play_arrow</i></a>
-                                        </div>
+                                    <div class="col s3">
+                                        Level2
                                     </div>
-                                </li>
-                                <li class="collection-item row">
-
-                                    <div class="col s1">
-                                        <input type="checkbox" id="v2" class="check" value="v2" />
-                                        <label for="v2"></label>
+                                    <div class="col s1 m2">
+                                        <a href="#!">
+                                            <div class="favo secondary-content valign-wrapper">
+                                                <div>121</div>
+                                            </div>
+                                        </a>
                                     </div>
-                                    <div class="col s9">
-                                        sabro
-                                    </div>
-                                    <div class="col s2">
-                                        <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                        <a href="#!" class="secondary-content" onclick="play(['v2']);"><i class="material-icons">play_arrow</i></a>
-                                    </div>
-                                </li>
-                                <li class="collection-item row">
-                                    <div class="col s1">
-                                        <input type="checkbox" id="v3" class="check" value="v3" />
-                                        <label for="v3"></label>
-                                    </div>
-                                    <div class="col s9">
-                                        jiro
-                                    </div>
-                                    <div class="col s2">
-                                        <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                        <a href="#!" class="secondary-content" onclick="play(['v3']);"><i class="material-icons">play_arrow</i></a>
-                                    </div>
-                                </li>
-                            </ul>
+                                </div>
+                            </div>
+                            <!-- ここまで一人分 -->
                         </div>
                         <li>
                             <div class="collapsible-header active">
                                 <img src="img/guitar.svg" width="24" height="24" class="insticon">ギター
-                                <a href="#!" class="secondary-content" onclick="rec('g')"><img src="img/rec.svg" width="24" height="24" class="insticon"></a>
                             </div>
                             <div class="collapsible-body">
-                                <ul class="collection">
-                                    <li class="collection-item row">
+                                <!-- ここから一人分 -->
+                                <div class="card-panel">
+                                    <div class="row valign-wrapper">
                                         <div class="col s1">
                                             <input type="checkbox" id="g1" class="check" value="g1" />
                                             <label for="g1"></label>
                                         </div>
-                                        <div class="col s9">
-                                            hanako
+                                        <div class="col s2 m1">
+                                            <img src="img/shigeru.png" alt="しげる" class="circle responsive-img">
                                         </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['g1']);"><i class="material-icons">play_arrow</i></a>
+                                        <div class="name col s4">
+                                            しげる
                                         </div>
-                                    </li>
-                                    <li class="collection-item row">
-
+                                        <div class="col s3">
+                                            Level2
+                                        </div>
+                                        <div class="col s1 m2">
+                                            <a href="#!">
+                                                <div class="favo secondary-content valign-wrapper">
+                                                    <div>106</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ここまで一人分 -->
+                                <!-- ここから一人分 -->
+                                <div class="card-panel">
+                                    <div class="row valign-wrapper">
                                         <div class="col s1">
-                                            <input type="checkbox" id="g2" class="check" value="g2" />
-                                            <label for="g2"></label>
+                                            <input type="checkbox" id="g1" class="check" value="g1" />
+                                            <label for="g1"></label>
                                         </div>
-                                        <div class="col s9">
-                                            sabro
+                                        <div class="col s2 m1">
+                                            <img src="img/luis.png" alt="Luis" class="circle responsive-img">
                                         </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['g2']);"><i class="material-icons">play_arrow</i></a>
+                                        <div class="name col s4">
+                                            Luis
                                         </div>
-                                    </li>
-                                    <li class="collection-item row">
-                                        <div class="col s1">
-                                            <input type="checkbox" id="g3" class="check" value="g3" />
-                                            <label for="g3"></label>
+                                        <div class="col s3">
+                                            Level2
                                         </div>
-                                        <div class="col s9">
-                                            jiro
+                                        <div class="col s1 m2">
+                                            <a href="#!">
+                                                <div class="favo secondary-content valign-wrapper">
+                                                    <div>103</div>
+                                                </div>
+                                            </a>
                                         </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['g3']);"><i class="material-icons">play_arrow</i></a>
-                                        </div>
-                                    </li>
-                                </ul>
+                                    </div>
+                                </div>
+                                <!-- ここまで一人分 -->
                             </div>
                         </li>
                         <li>
                             <div class="collapsible-header active">
                                 <img src="img/drum.svg" width="24" height="24" class="insticon">ドラム
-                                <a href="#!" class="secondary-content" onclick="rec('d')"><img src="img/rec.svg" width="24" height="24" class="insticon"></a>
                             </div>
                             <div class="collapsible-body">
                                 <ul class="collection">
@@ -197,6 +195,21 @@
         </div>
     </main>
 
+    <!-- モーダルフッター -->
+    <div id="modal1" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Modal Header</h4>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+        </div>
+    </div>
+
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
@@ -204,6 +217,7 @@
     <script>
         $(document).ready(function () {
             $('.collapsible').collapsible();
+            $('.modal').modal();
         });
 
         function playSelected() {
