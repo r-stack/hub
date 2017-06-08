@@ -50,6 +50,7 @@
             </div>
             <div class="row">
                 <ul id="records" class="collapsible" data-collapsible="expandable">
+                    <!-- ここには↓のテンプレートを使用した内容が挿入されます -->
                 </ul>
                 <!-- データ表示用のテンプレート(jQuery Templates 使用)) -->
                 <script id="template" type="text/x-jquery-tmpl">
@@ -59,7 +60,7 @@
                         </div>
                         <div class="collapsible-body">
                             {{each(i, record) records}}
-                            <div class="card-panel">
+                            <div id="${partId}${i + 1}" class="card-panel">
                                 <div class="row valign-wrapper">
                                     <div class="col s1">
                                         <input type="checkbox" id="${partId}${i + 1}" class="check" value="${partId}${i + 1}" />
@@ -75,7 +76,7 @@
                                         ${record.userLevel}
                                     </div>
                                     <div class="col s1 m2">
-                                        <a href="#!">
+                                        <a href="#!" onclick="addFavo('${partId}',${i + 1});">
                                             <div class="favo secondary-content valign-wrapper">
                                                 <div>${record.userFavo}</div>
                                             </div>
@@ -87,6 +88,7 @@
                         </div>
                     </li>
                 </script>
+                <!-- テンプレートここまで -->
             </div>
         </div>
     </main>
@@ -154,7 +156,7 @@
                     "partName": "ドラム",
                     "partIcon": "drum.svg",
                     "records": [
-                        
+
                     ]
                 }
             ];
@@ -177,6 +179,12 @@
                 return $(this).val();
             }).get();
             play(checked);
+        }
+
+        function addFavo(partId, sequence) {
+            console.log('#' + partId + sequence + ' div.favo div');
+            const favo = parseInt($('#' + partId + sequence + ' div.favo div').text());
+            $('#' + partId + sequence + ' div.favo div').text(favo + 1);
         }
     </script>
 </body>
