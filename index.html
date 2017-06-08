@@ -49,148 +49,44 @@
                 </div>
             </div>
             <div class="row">
-                <ul class="collapsible" data-collapsible="expandable">
+                <ul id="records" class="collapsible" data-collapsible="expandable">
+                </ul>
+                <!-- データ表示用のテンプレート(jQuery Templates 使用)) -->
+                <script id="template" type="text/x-jquery-tmpl">
                     <li>
                         <div class="collapsible-header active">
-                            <img src="img/mic.svg" width="24" height="24" class="insticon">ボーカル
+                            <img src="img/${partIcon}" width="24" height="24" class="insticon">${partName}
                         </div>
                         <div class="collapsible-body">
-                            <!-- ここから一人分 -->
+                            {{each(i, record) records}}
                             <div class="card-panel">
                                 <div class="row valign-wrapper">
                                     <div class="col s1">
-                                        <input type="checkbox" id="v1" class="check" value="v1" />
-                                        <label for="v1"></label>
+                                        <input type="checkbox" id="${partId}${i + 1}" class="check" value="${partId}${i + 1}" />
+                                        <label for="${partId}${i + 1}"></label>
                                     </div>
                                     <div class="col s2 m1">
-                                        <img src="img/hanako.png" alt="hanako" class="circle responsive-img">
+                                        <img src="img/${record.userIcon}" alt="${record.userName}" class="circle responsive-img">
                                     </div>
                                     <div class="name col s4">
-                                        hanako
+                                        ${record.userName}
                                     </div>
                                     <div class="col s3">
-                                        Level2
+                                        ${record.userLevel}
                                     </div>
                                     <div class="col s1 m2">
                                         <a href="#!">
                                             <div class="favo secondary-content valign-wrapper">
-                                                <div>121</div>
+                                                <div>${record.userFavo}</div>
                                             </div>
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                            <!-- ここまで一人分 -->
+                            {{/each}}
                         </div>
-                        <li>
-                            <div class="collapsible-header active">
-                                <img src="img/guitar.svg" width="24" height="24" class="insticon">ギター
-                            </div>
-                            <div class="collapsible-body">
-                                <!-- ここから一人分 -->
-                                <div class="card-panel">
-                                    <div class="row valign-wrapper">
-                                        <div class="col s1">
-                                            <input type="checkbox" id="g1" class="check" value="g1" />
-                                            <label for="g1"></label>
-                                        </div>
-                                        <div class="col s2 m1">
-                                            <img src="img/shigeru.png" alt="しげる" class="circle responsive-img">
-                                        </div>
-                                        <div class="name col s4">
-                                            しげる
-                                        </div>
-                                        <div class="col s3">
-                                            Level2
-                                        </div>
-                                        <div class="col s1 m2">
-                                            <a href="#!">
-                                                <div class="favo secondary-content valign-wrapper">
-                                                    <div>106</div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ここまで一人分 -->
-                                <!-- ここから一人分 -->
-                                <div class="card-panel">
-                                    <div class="row valign-wrapper">
-                                        <div class="col s1">
-                                            <input type="checkbox" id="g1" class="check" value="g1" />
-                                            <label for="g1"></label>
-                                        </div>
-                                        <div class="col s2 m1">
-                                            <img src="img/luis.png" alt="Luis" class="circle responsive-img">
-                                        </div>
-                                        <div class="name col s4">
-                                            Luis
-                                        </div>
-                                        <div class="col s3">
-                                            Level2
-                                        </div>
-                                        <div class="col s1 m2">
-                                            <a href="#!">
-                                                <div class="favo secondary-content valign-wrapper">
-                                                    <div>103</div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ここまで一人分 -->
-                            </div>
-                        </li>
-                        <li>
-                            <div class="collapsible-header active">
-                                <img src="img/drum.svg" width="24" height="24" class="insticon">ドラム
-                            </div>
-                            <div class="collapsible-body">
-                                <ul class="collection">
-                                    <li class="collection-item row">
-                                        <div class="col s1">
-                                            <input type="checkbox" id="d1" class="check" value="d1" />
-                                            <label for="d1"></label>
-                                        </div>
-                                        <div class="col s9">
-                                            hanako
-                                        </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['d1']);"><i class="material-icons">play_arrow</i></a>
-                                        </div>
-                                    </li>
-                                    <li class="collection-item row">
-
-                                        <div class="col s1">
-                                            <input type="checkbox" id="d2" class="check" value="d2" />
-                                            <label for="d2"></label>
-                                        </div>
-                                        <div class="col s9">
-                                            sabro
-                                        </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['d2']);"><i class="material-icons">play_arrow</i></a>
-                                        </div>
-                                    </li>
-                                    <li class="collection-item row">
-                                        <div class="col s1">
-                                            <input type="checkbox" id="d3" class="check" value="d3" />
-                                            <label for="d3"></label>
-                                        </div>
-                                        <div class="col s9">
-                                            jiro
-                                        </div>
-                                        <div class="col s2">
-                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
-                                            <a href="#!" class="secondary-content" onclick="play(['d3']);"><i class="material-icons">play_arrow</i></a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                </ul>
+                    </li>
+                </script>
             </div>
         </div>
     </main>
@@ -212,14 +108,69 @@
 
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src='http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
     <script src="index.js"></script>
     <script>
+        /**
+        * 表示用データ
+        */
+        const data =
+            [
+                {
+                    "partId": "v",
+                    "partName": "ボーカル",
+                    "partIcon": "mic.svg",
+                    "records": [
+                        {
+                            "userName": "hanako",
+                            "userIcon": "hanako.png",
+                            "userLevel": "Level2",
+                            "userFavo": "121"
+                        }
+                    ]
+                },
+                {
+                    "partId": "g",
+                    "partName": "ギター",
+                    "partIcon": "guitar.svg",
+                    "records": [
+                        {
+                            "userName": "しげる",
+                            "userIcon": "shigeru.png",
+                            "userLevel": "Level2",
+                            "userFavo": "105"
+                        },
+                        {
+                            "userName": "Luis",
+                            "userIcon": "luis.png",
+                            "userLevel": "Level2",
+                            "userFavo": "88"
+                        }
+                    ]
+                },
+                {
+                    "partId": "d",
+                    "partName": "ドラム",
+                    "partIcon": "drum.svg",
+                    "records": [
+                        
+                    ]
+                }
+            ];
+
+        /**
+        * 初期表示生成処理
+        */
         $(document).ready(function () {
+            $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
             $('.modal').modal();
         });
 
+        /**
+        * イベントハンドル関数
+        */
         function playSelected() {
             const checked = $('[class="check"]:checked').map(function () {
                 //$(this)でjQueryオブジェクトが取得できる。val()で値をvalue値を取得。
