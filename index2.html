@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="lib/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="lib/polymer/polymer.html">
+    <link rel="import" href="lib/webaudio-controls/webaudio-controls.html">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="title">Hub</a>
+
+                <ul id="nav-mobile" class="right">
+                    <li>
+                        <div class="col s3 center">
+                            <webaudio-slider id="volumeMain" direction="horz" src="lib/webaudio-controls/img/hsliderbody.png" knobsrc="lib/webaudio-controls/img/hsliderknob.png"
+                                min="0" max="1" step="0.1" value="0.7" defvalue="0.7" width="60" height="20" valuetip="1" tooltip="Main Volume"></webaudio-slider>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light light-blue" onclick="playSelected()"><i class="material-icons">pause</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light teal" onclick="playSelected()"><i class="material-icons">play_arrow</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a class="btn-floating btn-small waves-effect waves-light amber" onclick="stop()"><i class="material-icons">stop</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col s3 center">
+                            <a href="#modal1" class="modal-trigger btn-floating btn-small waves-effect waves-light red"><i class="material-icons">settings_voice</i></a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row valign-wrapper nomargin">
+                <div class="col s12 center">
+                    <h5>
+                        課題曲: コアラのマーチ
+                    </h5>
+                </div>
+            </div>
+            <div class="row">
+                <ul class="collapsible" data-collapsible="expandable">
+                    <li>
+                        <div class="collapsible-header active">
+                            <img src="img/mic.svg" width="24" height="24" class="insticon">ボーカル
+                        </div>
+                        <div class="collapsible-body">
+                            <!-- ここから一人分 -->
+                            <div class="card-panel">
+                                <div class="row valign-wrapper">
+                                    <div class="col s1">
+                                        <webaudio-switch id="track0_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                    </div>
+                                    <div class="col s1">
+                                        <webaudio-knob id="track0_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0" max="200" value="100"></webaudio-knob>
+                                    </div>
+                                    <div class="col s1">
+                                        <canvas id="track0_vol_indi" width="10" height="40"></canvas>
+                                    </div>
+                                    <div class="col s2 m1">
+                                        <img src="img/hanako.png" alt="hanako" class="circle responsive-img">
+                                    </div>
+                                    <div class="name col s4">
+                                        hanako
+                                    </div>
+                                    <div class="col s3">
+                                        Level2
+                                    </div>
+                                    <div class="col s1 m2">
+                                        <a href="#!">
+                                            <div class="favo secondary-content valign-wrapper">
+                                                <div>121</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ここまで一人分 -->
+                        </div>
+                        <li>
+                            <div class="collapsible-header active">
+                                <img src="img/guitar.svg" width="24" height="24" class="insticon">ギター
+                            </div>
+                            <div class="collapsible-body">
+                                <!-- ここから一人分 -->
+                                <div class="card-panel">
+                                    <div class="row valign-wrapper">
+                                        <div class="col s1">
+                                            <webaudio-switch id="track1_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                        </div>
+                                        <div class="col s1">
+                                            <webaudio-knob id="track1_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0" max="200" value="100"></webaudio-knob>
+                                        </div>
+                                        <div class="col s1">
+                                            <canvas id="track1_vol_indi" width="10" height="40"></canvas>
+                                        </div>
+                                        <div class="col s2 m1">
+                                            <img src="img/shigeru.png" alt="しげる" class="circle responsive-img">
+                                        </div>
+                                        <div class="name col s4">
+                                            しげる
+                                        </div>
+                                        <div class="col s3">
+                                            Level2
+                                        </div>
+                                        <div class="col s1 m2">
+                                            <a href="#!">
+                                                <div class="favo secondary-content valign-wrapper">
+                                                    <div>106</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ここまで一人分 -->
+                                <!-- ここから一人分 -->
+                                <div class="card-panel">
+                                    <div class="row valign-wrapper">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="g1" class="check" value="g1" />
+                                            <label for="g1"></label>
+                                        </div>
+                                        <div class="col s2 m1">
+                                            <img src="img/luis.png" alt="Luis" class="circle responsive-img">
+                                        </div>
+                                        <div class="name col s4">
+                                            Luis
+                                        </div>
+                                        <div class="col s3">
+                                            Level2
+                                        </div>
+                                        <div class="col s1 m2">
+                                            <a href="#!">
+                                                <div class="favo secondary-content valign-wrapper">
+                                                    <div>103</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ここまで一人分 -->
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-header active">
+                                <img src="img/drum.svg" width="24" height="24" class="insticon">ドラム
+                            </div>
+                            <div class="collapsible-body">
+                                <ul class="collection">
+                                    <li class="collection-item row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d1" class="check" value="d1" />
+                                            <label for="d1"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            hanako
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d1']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                    <li class="collection-item row">
+
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d2" class="check" value="d2" />
+                                            <label for="d2"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            sabro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d2']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                    <li class="collection-item row">
+                                        <div class="col s1">
+                                            <input type="checkbox" id="d3" class="check" value="d3" />
+                                            <label for="d3"></label>
+                                        </div>
+                                        <div class="col s9">
+                                            jiro
+                                        </div>
+                                        <div class="col s2">
+                                            <a href="#!" class="secondary-content" onclick="stop();"><i class="material-icons red-text">stop</i></a>
+                                            <a href="#!" class="secondary-content" onclick="play(['d3']);"><i class="material-icons">play_arrow</i></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- モーダルフッター -->
+    <div id="modal1" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Modal Header</h4>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+            <p>A bunch of text</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+    <script src="lib/recorder.js"></script>
+    <script src="index.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.collapsible').collapsible();
+            $('.modal').modal();
+        });
+
+        function playSelected() {
+            const checked = $('[class="check"]:checked').map(function () {
+                //$(this)でjQueryオブジェクトが取得できる。val()で値をvalue値を取得。
+                return $(this).val();
+            }).get();
+            play(checked);
+        }
+    </script>
+</body>
+
+</html>
