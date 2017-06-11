@@ -98,13 +98,15 @@ function rec(category){
 
 
 function test01(){
-    t1_indi = new VolumeIndicator(ctrls[0].source, document.getElementById("t1_indi"));
+    t1_indi = new VolumeIndicator(ctrls[0].source, document.getEementById("t1_indi"));
     t1_indi.start();
 }
 function test02(){
-    window.m = new Mixer();
-    window.m.loadAudioBuffer("0", "v1");
-    window.m.loadAudioBuffer("1", "g1");
+    var m = window.m = new Mixer();
+    m.loadAudioBuffer("0", "v1");
+    m.loadAudioBuffer("1", "g1");
+    window.r = new RecordDeck(m);
+    window.metro = new Metronome(m);
 }
 
 
@@ -120,6 +122,28 @@ class Mixer{
         this._startTime = 0;
         this._offsetTime = 0
         this._playing = false;
+        var self = this;        
+
+        this.metronome = new Metronome(this);
+        this.recorddeck = new RecordDeck(this);
+
+        //dom event
+        $("#main_vol").on("change", (e)=>{
+            var v= e.target.value;
+            self.gainNode.gain.value = v/100;
+        });
+        $("#main_play").on("click", (e)=>{
+            self.play();
+        });
+        $("#main_pause").on("click", (e)=>{
+            self.pause();
+        });
+        $("#main_stop").on("click", (e)=>{
+            self.stop();
+        });
+        $("#main_rec").on("click", (e)=>{
+            self.rec();
+        });
     }
     get offset(){
         if(this.playing){
@@ -132,6 +156,7 @@ class Mixer{
         return this._playing;
     }
     play(){
+        if(this.playing) return;
         var _startTime = this.context.currentTime + 1;
         var offsetTime = this._offsetTime;
         this.tracks.forEach((track)=>track.start(_startTime, offsetTime));
@@ -147,6 +172,11 @@ class Mixer{
         this.tracks.forEach((track)=>track.stop());
         this._offsetTime = 0;
         this._playing = false;
+    }
+    rec(){
+        var self = this;
+        if(this.playing) return;
+        this.recorddeck.open();
     }
 
     addTrack(id, buf) {
@@ -286,87 +316,134 @@ class VolumeIndicator{
 
 //--------------------------------------------
 // for REC
-function cancelAnalyserUpdates() {
-    window.cancelAnimationFrame( rafID );
-    rafID = null;
-}
 
-function updateAnalysers(time) {
-    if (!analyserContext) {
-        var canvas = document.getElementById("analyser");
-        canvasWidth = canvas.width;
-        canvasHeight = canvas.height;
-        analyserContext = canvas.getContext('2d');
+class RecordDeck {
+
+    constructor(mixer) {
+        this.mixer = mixer;
+        this.audioContext = mixer.context;
+        this.resizeAnalyzer();
+        var canvas = document.getElementById("rec_analyser");
+        this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
+        this.analyserContext = canvas.getContext('2d');
+        this.initAudio();
+
+        this.$modal = $("#rec_modal").modal({
+            ready: this.ready.bind(this),
+            complete: this.complete.bind(this)
+        });
+
+        window.onorientationchange = this.resizeAnalyzer.bind(this);
+        window.onresize = this.resizeAnalyzer.bind(this);
+    }
+    ready(){
+        this.resizeAnalyzer();
+        this.record();
+    }
+    complete(){
+        var self = this;
+        console.log("complete");
+        this.stop();
+        this.audioRecorder.getBuffer((buf)=>{
+            console.log(buf);
+            var ab = self.audioContext.createBuffer(2, buf[0].length, self.audioContext.sampleRate);
+            console.log(ab);
+            for (var channel = 0; channel < 2; channel++) {
+                // 実際のデータの配列を得る
+                var nowBuffering = ab.getChannelData(channel);
+                for (var i = 0; i < buf[0].length; i++) {
+                    // Math.random()は[0; 1.0]である
+                    // 音声は[-1.0; 1.0]である必要がある
+                    nowBuffering[i] = buf[channel][i];
+                }
+            }
+            self.mixer.tracks[0].buffer = ab;
+        });
+    }
+    open(){
+        this.$modal.modal("open");
+    }
+    close(){
+        this.$modal.modal("close");
+    }
+    record(){
+        this.audioRecorder.clear();
+        this.audioRecorder.record();
+    }
+    stop(){
+        this.audioRecorder.stop();
+    }
+    resizeAnalyzer(){
+        var canvas = document.getElementById("rec_analyser");
+        var wrapper = canvas.parentElement;
+        $(canvas).attr('width', $(wrapper).width());
+        this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
+
+    }
+    cancelAnalyserUpdates() {
+        window.cancelAnimationFrame(rafID);
+        this.rafID = null;
     }
 
-    // analyzer draw code here
-    {
-        var SPACING = 3;
-        var BAR_WIDTH = 1;
-        var numBars = Math.round(canvasWidth / SPACING);
-        var freqByteData = new Uint8Array(analyserNode.frequencyBinCount);
+    updateAnalysers(time) {
 
-        analyserNode.getByteFrequencyData(freqByteData); 
+        // analyzer draw code here
+        {
+            var SPACING = 3;
+            var BAR_WIDTH = 1;
+            var numBars = Math.round(this.canvasWidth / SPACING);
+            var freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
 
-        analyserContext.clearRect(0, 0, canvasWidth, canvasHeight);
-        analyserContext.fillStyle = '#F6D565';
-        analyserContext.lineCap = 'round';
-        var multiplier = analyserNode.frequencyBinCount / numBars;
+            this.analyserNode.getByteFrequencyData(freqByteData);
 
-        // Draw rectangle for each frequency bin.
-        for (var i = 0; i < numBars; ++i) {
-            var magnitude = 0;
-            var offset = Math.floor( i * multiplier );
-            // gotta sum/average the block, or we miss narrow-bandwidth spikes
-            for (var j = 0; j< multiplier; j++)
-                magnitude += freqByteData[offset + j];
-            magnitude = magnitude / multiplier;
-            var magnitude2 = freqByteData[i * multiplier];
-            analyserContext.fillStyle = "hsl( " + Math.round((i*360)/numBars) + ", 100%, 50%)";
-            analyserContext.fillRect(i * SPACING, canvasHeight, BAR_WIDTH, -magnitude);
+            this.analyserContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            this.analyserContext.fillStyle = '#F6D565';
+            this.analyserContext.lineCap = 'round';
+            var multiplier = this.analyserNode.frequencyBinCount / numBars;
+            var rate = this.canvasHeight/255;
+            // Draw rectangle for each frequency bin.
+            for (var i = 0; i < numBars; ++i) {
+                var magnitude = 0;
+                var offset = Math.floor(i * multiplier);
+                // gotta sum/average the block, or we miss narrow-bandwidth spikes
+                for (var j = 0; j < multiplier; j++)
+                    magnitude += freqByteData[offset + j];
+                magnitude = magnitude / multiplier * rate;
+                var magnitude2 = freqByteData[i * multiplier];
+                this.analyserContext.fillStyle = "hsl( " + Math.round((i * 360) / numBars) + ", 100%, 50%)";
+                this.analyserContext.fillRect(i * SPACING, this.canvasHeight, BAR_WIDTH, -magnitude);
+            }
         }
-    }
-    
-    rafID = window.requestAnimationFrame( updateAnalysers );
-}
 
-function toggleMono() {
-    if (audioInput != realAudioInput) {
-        audioInput.disconnect();
-        realAudioInput.disconnect();
-        audioInput = realAudioInput;
-    } else {
-        realAudioInput.disconnect();
-        audioInput = convertToMono( realAudioInput );
+        this.rafID = window.requestAnimationFrame(this.updateAnalysers.bind(this));
     }
 
-    audioInput.connect(inputPoint);
-}
 
-function gotStream(stream) {
-    inputPoint = audioContext.createGain();
+    gotStream(stream) {
+        var inputPoint = this.audioContext.createGain();
 
-    // Create an AudioNode from the stream.
-    realAudioInput = audioContext.createMediaStreamSource(stream);
-    audioInput = realAudioInput;
-    audioInput.connect(inputPoint);
+        // Create an AudioNode from the stream.
+        var realAudioInput = this.audioContext.createMediaStreamSource(stream);
+        var audioInput = realAudioInput;
+        audioInput.connect(inputPoint);
 
-//    audioInput = convertToMono( input );
 
-    analyserNode = audioContext.createAnalyser();
-    analyserNode.fftSize = 2048;
-    inputPoint.connect( analyserNode );
+        this.analyserNode = this.audioContext.createAnalyser();
+        this.analyserNode.fftSize = 2048;
+        inputPoint.connect(this.analyserNode);
 
-    audioRecorder = new Recorder( inputPoint );
+        this.audioRecorder = new Recorder(inputPoint);
 
-    zeroGain = audioContext.createGain();
-    zeroGain.gain.value = 0.0;
-    inputPoint.connect( zeroGain );
-    zeroGain.connect( audioContext.destination );
-    updateAnalysers();
-}
+        var zeroGain = this.audioContext.createGain();
+        zeroGain.gain.value = 0.0;
+        inputPoint.connect(zeroGain);
+        zeroGain.connect(this.audioContext.destination);
+        this.updateAnalysers();
+    }
 
-function initAudio() {
+    initAudio() {
         if (!navigator.getUserMedia)
             navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
         if (!navigator.cancelAnimationFrame)
@@ -374,19 +451,118 @@ function initAudio() {
         if (!navigator.requestAnimationFrame)
             navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
 
-    navigator.getUserMedia(
-        {
-            "audio": {
-                "mandatory": {
-                    "googEchoCancellation": "false",
-                    "googAutoGainControl": "false",
-                    "googNoiseSuppression": "false",
-                    "googHighpassFilter": "false"
+        navigator.getUserMedia(
+            {
+                "audio": {
+                    "mandatory": {
+                        "googEchoCancellation": "false",
+                        "googAutoGainControl": "false",
+                        "googNoiseSuppression": "false",
+                        "googHighpassFilter": "false"
+                    },
+                    "optional": []
                 },
-                "optional": []
-            },
-        }, gotStream, function(e) {
-            alert('Error getting audio');
-            console.log(e);
-        });
+            }, this.gotStream.bind(this), (e) => {
+                alert('Error getting audio');
+                console.log(e);
+            });
+    }
+
+}
+
+
+
+//------------------------------
+// metronome
+
+class Metronome{
+    constructor(mixer){
+        this.context = mixer.context;
+        this.isPlaying = false;      // Are we currently playing?
+        this.startTime;              // The start time of the entire sequence.
+        this.current16thNote;        // What note is currently last scheduled?
+        this.tempo = 120.0;          // tempo (in beats per minute)
+        this.lookahead = 25.0;       // How frequently to call scheduling function 
+        //(in milliseconds)
+        this.scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
+        // This is calculated from lookahead, and overlaps 
+        // with next interval (in case the timer is late)
+        this.nextNoteTime = 0.0;     // when the next note is due.
+        this.noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
+        this.noteLength = 0.05;      // length of "beep" (in seconds)
+        this.last16thNoteDrawn = -1; // the last "box" we drew on the screen
+        this.notesInQueue = [];      // the notes that have been put into the web audio,
+        // and may or may not have played yet. {note, time}
+        this.timerWorker = null;     // The Web Worker used to fire timer messages
+
+        this.timerWorker = new Worker("metronomeworker.js");
+        var self = this;
+        this.timerWorker.onmessage = function (e) {
+            if (e.data == "tick") {
+                // console.log("tick!");
+                self.scheduler();
+            }
+            else
+                console.log("message: " + e.data);
+        };
+        this.timerWorker.postMessage({ "interval": this.lookahead });
+    }
+    nextNote() {
+        // Advance current note and time by a 16th note...
+        var secondsPerBeat = 60.0 / this.tempo;    // Notice this picks up the CURRENT 
+        // tempo value to calculate beat length.
+        this.nextNoteTime += 0.25 * secondsPerBeat;    // Add beat length to last beat time
+
+        this.current16thNote++;    // Advance the beat number, wrap to zero
+        if (this.current16thNote == 16) {
+            this.current16thNote = 0;
+        }
+    }
+
+    scheduleNote(beatNumber, time) {
+        // push the note on the queue, even if we're not playing.
+        this.notesInQueue.push({ note: beatNumber, time: time });
+
+        if ((this.noteResolution == 1) && (beatNumber % 2))
+            return; // we're not playing non-8th 16th notes
+        if ((this.noteResolution == 2) && (beatNumber % 4))
+            return; // we're not playing non-quarter 8th notes
+
+        // create an oscillator
+        var osc = this.context.createOscillator();
+        osc.connect(this.context.destination);
+        if (beatNumber % 16 === 0)    // beat 0 == high pitch
+            osc.frequency.value = 880.0;
+        else if (beatNumber % 4 === 0)    // quarter notes = medium pitch
+            osc.frequency.value = 440.0;
+        else                        // other 16th notes = low pitch
+            osc.frequency.value = 220.0;
+
+        osc.start(time);
+        osc.stop(time + this.noteLength);
+    }
+
+    scheduler() {
+        // while there are notes that will need to play before the next interval, 
+        // schedule them and advance the pointer.
+        while (this.nextNoteTime < this.context.currentTime + this.scheduleAheadTime) {
+            this.scheduleNote(this.current16thNote, this.nextNoteTime);
+            this.nextNote();
+        }
+    }
+
+    play() {
+        this.isPlaying = !this.isPlaying;
+
+        if (this.isPlaying) { // start playing
+            this.current16thNote = 0;
+            this.nextNoteTime = this.context.currentTime;
+            this.timerWorker.postMessage("start");
+            return "stop";
+        } else {
+            this.timerWorker.postMessage("stop");
+            return "play";
+        }
+    }
+
 }
