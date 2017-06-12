@@ -155,9 +155,12 @@ class Mixer{
     get playing(){
         return this._playing;
     }
-    play(){
+    play(startTime){
         if(this.playing) return;
-        var _startTime = this.context.currentTime + 1;
+        var _startTime = startTime;
+        if(_startTime===undefined){
+            _startTime = this.context.currentTime + 1;
+        }
         var offsetTime = this._offsetTime;
         this.tracks.forEach((track)=>track.start(_startTime, offsetTime));
         this._startTime = _startTime;
@@ -176,11 +179,14 @@ class Mixer{
     rec(){
         var self = this;
         if(this.playing) return;
+        this._offsetTime = 0;
         this.recorddeck.open();
     }
 
     addTrack(id, buf) {
-
+        if(id === undefined){
+            id = this.tracks.length;
+        }
         var track = new Track(id, this, buf);
         track.output.connect(this.gainNode);
         this.tracks.push(track);
@@ -220,6 +226,8 @@ class Track{
         var gainNode = this.gainNode = context.createGain();
 
         this.enabled = false;
+
+        this.$el = $(".track" + id);
         this.elToggle = document.getElementById("track"+id+"_toggle");
         this.elToggle.addEventListener('change', (e)=>{
             var v= e.target.value;
@@ -241,6 +249,13 @@ class Track{
 
         this.volumeDb = new VolumeIndicator(this.gainNode, document.getElementById("track" + id + "_vol_indi"));
         this.volumeDb.start();
+
+        this.$heart = this.$el.find(".heart");
+        this.$heart.on("click", (e)=>{
+            console.log("cloned!!!!!");
+            var cloneTrack = self.mixer.addTrack(undefined, self.buffer);
+            cloneTrack.$el.find(".name").innerText = self.$el.find(".name").innerText;
+        });
         
     }
     start(when, offset){
@@ -338,24 +353,28 @@ class RecordDeck {
         window.onresize = this.resizeAnalyzer.bind(this);
     }
     ready(){
+        console.log("ready");
         this.resizeAnalyzer();
         this.record();
     }
     complete(){
         var self = this;
+        this.mixer.metronome.play();
         console.log("complete");
+        this.mixer.stop();
         this.stop();
         this.audioRecorder.getBuffer((buf)=>{
             console.log(buf);
-            var ab = self.audioContext.createBuffer(2, buf[0].length, self.audioContext.sampleRate);
+            var trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
+            var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
             console.log(ab);
             for (var channel = 0; channel < 2; channel++) {
                 // 実際のデータの配列を得る
                 var nowBuffering = ab.getChannelData(channel);
-                for (var i = 0; i < buf[0].length; i++) {
+                for (var i = 0; i < nowBuffering.length; i++) {
                     // Math.random()は[0; 1.0]である
                     // 音声は[-1.0; 1.0]である必要がある
-                    nowBuffering[i] = buf[channel][i];
+                    nowBuffering[i] = buf[channel][trimIndex + i];
                 }
             }
             self.mixer.tracks[0].buffer = ab;
@@ -368,8 +387,25 @@ class RecordDeck {
         this.$modal.modal("close");
     }
     record(){
+        var self = this;
         this.audioRecorder.clear();
         this.audioRecorder.record();
+        this._precountTime = this.audioContext.currentTime;
+        var current = this.mixer.context.currentTime;
+        $(this.mixer.metronome).off("tick");
+        var measures = 0
+        $(this.mixer.metronome).on("tick", function(evt, data){
+            console.log(data);
+            if (data.beat === 0){
+                measures += 1;
+            }
+            if (measures === 2){
+                console.log("play start");
+                self.mixer.play(data.time);
+                self.trimOffset = data.time - self._precountTime;
+            }
+        });
+        this.mixer.metronome.play();
     }
     stop(){
         this.audioRecorder.stop();
@@ -488,7 +524,7 @@ class Metronome{
         // This is calculated from lookahead, and overlaps 
         // with next interval (in case the timer is late)
         this.nextNoteTime = 0.0;     // when the next note is due.
-        this.noteResolution = 0;     // 0 == 16th, 1 == 8th, 2 == quarter note
+        this.noteResolution = 1;     // 0 == 16th, 1 == 8th, 2 == quarter note
         this.noteLength = 0.05;      // length of "beep" (in seconds)
         this.last16thNoteDrawn = -1; // the last "box" we drew on the screen
         this.notesInQueue = [];      // the notes that have been put into the web audio,
@@ -540,6 +576,7 @@ class Metronome{
 
         osc.start(time);
         osc.stop(time + this.noteLength);
+        $(this).trigger("tick", {beat:beatNumber % 16, time: time});
     }
 
     scheduler() {
