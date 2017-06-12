@@ -14,6 +14,40 @@
 </head>
 
 <body>
+
+    <template id="tmpl-row">
+        <div class="card-panel track0">
+            <div class="row valign-wrapper">
+                <div class="col s1">
+                    <webaudio-switch id="track0_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                </div>
+                <div class="col s1">
+                    <webaudio-knob id="track0_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0" max="200"
+                        value="100"></webaudio-knob>
+                </div>
+                <div class="col s1">
+                    <canvas id="track0_vol_indi" width="10" height="40"></canvas>
+                </div>
+                <div class="col s2 m1">
+                    <img src="img/hanako.png" alt="hanako" class="circle responsive-img">
+                </div>
+                <div class="name col s4">
+                    hanako
+                </div>
+                <div class="col s3">
+                    Level2
+                </div>
+                <div class="col s1 m2">
+                    <a href="#!" class="heart">
+                        <div class="favo secondary-content valign-wrapper">
+                            <div>121</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <header>
         <nav>
             <div class="nav-wrapper">
@@ -67,7 +101,7 @@
                         </div>
                         <div class="collapsible-body">
                             <!-- ここから一人分 -->
-                            <div class="card-panel">
+                            <div class="card-panel track0">
                                 <div class="row valign-wrapper">
                                     <div class="col s1">
                                         <webaudio-switch id="track0_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
@@ -88,7 +122,7 @@
                                         Level2
                                     </div>
                                     <div class="col s1 m2">
-                                        <a href="#!">
+                                        <a href="#!" class="heart">
                                             <div class="favo secondary-content valign-wrapper">
                                                 <div>121</div>
                                             </div>
@@ -104,7 +138,7 @@
                             </div>
                             <div class="collapsible-body">
                                 <!-- ここから一人分 -->
-                                <div class="card-panel">
+                                <div class="card-panel track1">
                                     <div class="row valign-wrapper">
                                         <div class="col s1">
                                             <webaudio-switch id="track1_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
@@ -133,13 +167,49 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- ここまで一人分 -->
                                 <!-- ここから一人分 -->
-                                <div class="card-panel">
+                                <div class="card-panel track2">
                                     <div class="row valign-wrapper">
                                         <div class="col s1">
-                                            <input type="checkbox" id="g1" class="check" value="g1" />
-                                            <label for="g1"></label>
+                                            <webaudio-switch id="track2_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                        </div>
+                                        <div class="col s1">
+                                            <webaudio-knob id="track2_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0" max="200" value="100"></webaudio-knob>
+                                        </div>
+                                        <div class="col s1">
+                                            <canvas id="track2_vol_indi" width="10" height="40"></canvas>
+                                        </div>
+                                        <div class="col s2 m1">
+                                            <img src="img/shigeru.png" alt="しげる" class="circle responsive-img">
+                                        </div>
+                                        <div class="name col s4">
+                                            しげる
+                                        </div>
+                                        <div class="col s3">
+                                            Level2
+                                        </div>
+                                        <div class="col s1 m2">
+                                            <a href="#!">
+                                                <div class="favo secondary-content valign-wrapper">
+                                                    <div>106</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ここまで一人分 -->
+                                <!-- ここまで一人分 -->
+                                <!-- ここから一人分 -->
+                                <div class="card-panel track3">
+                                    <div class="row valign-wrapper">
+                                        <div class="col s1">
+                                            <webaudio-switch id="track3_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                        </div>
+                                        <div class="col s1">
+                                            <webaudio-knob id="track3_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0" max="200" value="100"></webaudio-knob>
+                                        </div>
+                                        <div class="col s1">
+                                            <canvas id="track3_vol_indi" width="10" height="40"></canvas>
                                         </div>
                                         <div class="col s2 m1">
                                             <img src="img/luis.png" alt="Luis" class="circle responsive-img">
@@ -151,7 +221,7 @@
                                             Level2
                                         </div>
                                         <div class="col s1 m2">
-                                            <a href="#!">
+                                            <a href="#!" class="heart">
                                                 <div class="favo secondary-content valign-wrapper">
                                                     <div>103</div>
                                                 </div>
