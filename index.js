@@ -115,6 +115,7 @@ function test02(){
 //
 class Mixer{
     constructor(){
+        this.musicTitle = "MARCH OF KOALA";
         this.tracks = [];
         this.context = new window.AudioContext();
         this.gainNode = this.context.createGain();
@@ -126,6 +127,10 @@ class Mixer{
 
         this.metronome = new Metronome(this);
         this.recorddeck = new RecordDeck(this);
+        
+        //init LCD
+        this.lcd = new CanvasLCD('06');
+        this.lcd.init('mixer_lcd', this.musicTitle, true);
 
         //dom event
         $("#main_vol").on("change", (e)=>{
@@ -147,7 +152,11 @@ class Mixer{
     }
     get offset(){
         if(this.playing){
-            return this.context.currentTime - this._startTime + this._offsetTime; 
+            if(this.context.currentTime - this._startTime<0){
+                return this._offsetTime;
+            }else{
+                return this.context.currentTime - this._startTime + this._offsetTime;
+            }
         }else{
             return this._offsetTime;
         }
@@ -165,16 +174,20 @@ class Mixer{
         this.tracks.forEach((track)=>track.start(_startTime, offsetTime));
         this._startTime = _startTime;
         this._playing = true;
+        this._startLCD();
     }
     pause(){
         this.tracks.forEach((track)=>track.stop());
-        this._offsetTime = this.context.currentTime - this._startTime;
+        this._offsetTime = this.offset;
         this._playing = false;
+        this._stopLCD();
     }
     stop(){
         this.tracks.forEach((track)=>track.stop());
         this._offsetTime = 0;
         this._playing = false;
+        this._drawLCD();
+        this._stopLCD();
     }
     rec(){
         var self = this;
@@ -183,6 +196,26 @@ class Mixer{
         this.recorddeck.open();
     }
 
+    _startLCD(){
+        this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
+    }
+    _drawLCD(){
+        var offset = this.offset;
+        if(offset >= 0){
+            var sei = Math.floor(this.offset * 100);
+            var sec = Math.floor(sei / 100);
+            var deci = sei % 100;
+            var fff = "                                    " + sec + "." + ("00"+deci).slice(-2);
+            var dispoffset = fff.slice(this.musicTitle.length-36+1);
+            this.lcd.write2Display("letters", this.musicTitle + " "+ dispoffset);
+        }
+        this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
+    }
+    _stopLCD(){
+        if(this._lcd_rafId){
+            window.cancelAnimationFrame(this._lcd_rafId)
+        }
+    }
     addTrack(id, buf) {
         if(id === undefined){
             id = this.tracks.length;
@@ -304,8 +337,8 @@ class VolumeIndicator{
     }
     stop() {
         if (this.rafID) {
-            window.cancelAnimationFrame(rafID);
-            rafID = null;
+            window.cancelAnimationFrame(this.rafID);
+            this.rafID = null;
         }
     }
     _draw(time){
@@ -399,7 +432,7 @@ class RecordDeck {
             if (data.beat === 0){
                 measures += 1;
             }
-            if (measures === 2){
+            if (measures === 2 && !self.mixer.playing){
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -499,7 +532,7 @@ class RecordDeck {
                     "optional": []
                 },
             }, this.gotStream.bind(this), (e) => {
-                alert('Error getting audio');
+                alert('Error getting UserMedia audio stream');
                 console.log(e);
             });
     }
@@ -524,7 +557,7 @@ class Metronome{
         // This is calculated from lookahead, and overlaps 
         // with next interval (in case the timer is late)
         this.nextNoteTime = 0.0;     // when the next note is due.
-        this.noteResolution = 1;     // 0 == 16th, 1 == 8th, 2 == quarter note
+        this.noteResolution = 2;     // 0 == 16th, 1 == 8th, 2 == quarter note
         this.noteLength = 0.05;      // length of "beep" (in seconds)
         this.last16thNoteDrawn = -1; // the last "box" we drew on the screen
         this.notesInQueue = [];      // the notes that have been put into the web audio,
