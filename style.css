@@ -1,4 +1,10 @@
+body{
+    margin: 0px;
+    min-width: 520px;
+}
+
 .title{
+    height: 100% !important;
     margin-left: 20px;
     font-size: 2em;
 }

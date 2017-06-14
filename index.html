@@ -16,8 +16,8 @@
 <body>
     <header>
         <nav>
-            <div class="nav-wrapper">
-                <a href="#" class="title">Hub</a>
+            <div class="nav-wrapper blue-grey darken-3">
+                <img src="img/hub_logo.png" alt="Hub" class="responsive-img title">
                 <ul id="nav-mobile" class="right">
                     <li>
                         <div class="">
@@ -185,10 +185,10 @@
             $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
             const mixer = window.mixer = new Mixer();
-            for(let i = 0; i < data.length; i++){
-                for(let j = 0; j < data[i].records.length; j++){
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < data[i].records.length; j++) {
                     const trackId = data[i].partId + j.toString();
-                    mixer.loadAudioBuffer(trackId, trackId);        
+                    mixer.loadAudioBuffer(trackId, trackId);
                 }
             }
         });
@@ -203,7 +203,6 @@
             const favo = parseInt($('#' + partId + sequence + ' div.favo div').text());
             $('#' + partId + sequence + ' div.favo div').text(favo + 1);
         }
-
     </script>
 </body>
 
