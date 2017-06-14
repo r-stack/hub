@@ -6,7 +6,7 @@
 var SupportedAudioContext;
 try {
     SupportedAudioContext = window.AudioContext || window.webkitAudioContext;
-} catch(e) {
+} catch (e) {
     throw new Error('Web Audio API is not supported.');
 }
 var context;
@@ -15,53 +15,53 @@ var context;
 var source;
 var ctrls;
 
-function play(targets){
-    if(!targets || targets.length === 0){
+function play(targets) {
+    if (!targets || targets.length === 0) {
         return;
     }
-    if(!context){
+    if (!context) {
         context = new SupportedAudioContext();
     }
-    
+
     ctrls = new Array();
-    
+
     var dffs = new Array();
-    
-    $.each(targets, function(i, target){
-       
+
+    $.each(targets, function (i, target) {
+
         var url = '/sound/' + target + '.mp3';
 
-        
+
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
         request.send();
-        
-        
+
+
         var d = new $.Deferred;
         request.onload = function () {
             // contextにArrayBufferを渡し、decodeさせる
             context.decodeAudioData(request.response, function (buf) {
-//                buffer = buf;
+                //                buffer = buf;
                 ctrls.push(createSource(buf));
                 d.resolve();
             });
         };
-        
+
         dffs.push(d);
     });
-        
-    
-    $.when.apply($, dffs).then(function(){
-        
-        $.each(ctrls, function(i, ctrl){
-            
+
+
+    $.when.apply($, dffs).then(function () {
+
+        $.each(ctrls, function (i, ctrl) {
+
             ctrl.source.connect(context.destination);
             ctrl.source.start(0);
         });
     });
-    
-    
+
+
 
 };
 
@@ -78,30 +78,30 @@ function createSource(buffer) {
     gainNode.connect(context.destination);
 
     return {
-      source: source,
-      gainNode: gainNode
+        source: source,
+        gainNode: gainNode
     };
-  }
+}
 
-function stop(){
-    $.each(ctrls, function(i, ctrl){
+function stop() {
+    $.each(ctrls, function (i, ctrl) {
         ctrl.source.stop();
     });
 }
 
 
-function rec(category){
-   console.log("rec") 
+function rec(category) {
+    console.log("rec")
 }
 
 
 
 
-function test01(){
+function test01() {
     t1_indi = new VolumeIndicator(ctrls[0].source, document.getEementById("t1_indi"));
     t1_indi.start();
 }
-function test02(){
+function test02() {
     var m = window.m = new Mixer();
     m.loadAudioBuffer("0", "v1");
     m.loadAudioBuffer("1", "g1");
@@ -113,8 +113,8 @@ function test02(){
 //---------------------------------------------
 // Mixer
 //
-class Mixer{
-    constructor(){
+class Mixer {
+    constructor() {
         this.musicTitle = "MARCH OF KOALA";
         this.tracks = [];
         this.context = new window.AudioContext();
@@ -123,101 +123,101 @@ class Mixer{
         this._startTime = 0;
         this._offsetTime = 0
         this._playing = false;
-        var self = this;        
+        var self = this;
 
         this.metronome = new Metronome(this);
         this.recorddeck = new RecordDeck(this);
-        
+
         //init LCD
         this.lcd = new CanvasLCD('06');
         this.lcd.init('mixer_lcd', this.musicTitle, true);
 
         //dom event
-        $("#main_vol").on("change", (e)=>{
-            var v= e.target.value;
-            self.gainNode.gain.value = v/100;
+        $("#main_vol").on("change", (e) => {
+            var v = e.target.value;
+            self.gainNode.gain.value = v / 100;
         });
-        $("#main_play").on("click", (e)=>{
+        $("#main_play").on("click", (e) => {
             self.play();
         });
-        $("#main_pause").on("click", (e)=>{
+        $("#main_pause").on("click", (e) => {
             self.pause();
         });
-        $("#main_stop").on("click", (e)=>{
+        $("#main_stop").on("click", (e) => {
             self.stop();
         });
-        $("#main_rec").on("click", (e)=>{
+        $("#main_rec").on("click", (e) => {
             self.rec();
         });
     }
-    get offset(){
-        if(this.playing){
-            if(this.context.currentTime - this._startTime<0){
+    get offset() {
+        if (this.playing) {
+            if (this.context.currentTime - this._startTime < 0) {
                 return this._offsetTime;
-            }else{
+            } else {
                 return this.context.currentTime - this._startTime + this._offsetTime;
             }
-        }else{
+        } else {
             return this._offsetTime;
         }
     }
-    get playing(){
+    get playing() {
         return this._playing;
     }
-    play(startTime){
-        if(this.playing) return;
+    play(startTime) {
+        if (this.playing) return;
         var _startTime = startTime;
-        if(_startTime===undefined){
+        if (_startTime === undefined) {
             _startTime = this.context.currentTime + 1;
         }
         var offsetTime = this._offsetTime;
-        this.tracks.forEach((track)=>track.start(_startTime, offsetTime));
+        this.tracks.forEach((track) => track.start(_startTime, offsetTime));
         this._startTime = _startTime;
         this._playing = true;
         this._startLCD();
     }
-    pause(){
-        this.tracks.forEach((track)=>track.stop());
+    pause() {
+        this.tracks.forEach((track) => track.stop());
         this._offsetTime = this.offset;
         this._playing = false;
         this._stopLCD();
     }
-    stop(){
-        this.tracks.forEach((track)=>track.stop());
+    stop() {
+        this.tracks.forEach((track) => track.stop());
         this._offsetTime = 0;
         this._playing = false;
         this._drawLCD();
         this._stopLCD();
     }
-    rec(){
+    rec() {
         var self = this;
-        if(this.playing) return;
+        if (this.playing) return;
         this._offsetTime = 0;
         this.recorddeck.open();
     }
 
-    _startLCD(){
+    _startLCD() {
         this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
     }
-    _drawLCD(){
+    _drawLCD() {
         var offset = this.offset;
-        if(offset >= 0){
+        if (offset >= 0) {
             var sei = Math.floor(this.offset * 100);
             var sec = Math.floor(sei / 100);
             var deci = sei % 100;
-            var fff = "                                    " + sec + "." + ("00"+deci).slice(-2);
-            var dispoffset = fff.slice(this.musicTitle.length-36+1);
-            this.lcd.write2Display("letters", this.musicTitle + " "+ dispoffset);
+            var fff = "                                    " + sec + "." + ("00" + deci).slice(-2);
+            var dispoffset = fff.slice(this.musicTitle.length - 36 + 1);
+            this.lcd.write2Display("letters", this.musicTitle + " " + dispoffset);
         }
         this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
     }
-    _stopLCD(){
-        if(this._lcd_rafId){
+    _stopLCD() {
+        if (this._lcd_rafId) {
             window.cancelAnimationFrame(this._lcd_rafId)
         }
     }
     addTrack(id, buf) {
-        if(id === undefined){
+        if (id === undefined) {
             id = this.tracks.length;
         }
         var track = new Track(id, this, buf);
@@ -225,32 +225,34 @@ class Mixer{
         this.tracks.push(track);
         return track;
     }
-    loadAudioBuffer(id, target){
+    loadAudioBuffer(id, target) {
         var self = this;
         var url = '/sound/' + target + '.mp3';
-        
+
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
         request.send();
-        
-        
+
+
         var d = new $.Deferred;
         request.onload = function () {
             console.log(self);
-            // contextにArrayBufferを渡し、decodeさせる
-            self.context.decodeAudioData(request.response, function (buf) {
-//                buffer = buf;
-                d.resolve(self.addTrack(id, buf));
-            });
+            // オーディオデータが取得できた場合、contextにArrayBufferを渡し、decodeさせる
+            if (this.status === 200) {
+                self.context.decodeAudioData(request.response, function (buf) {
+                    //                buffer = buf;
+                    d.resolve(self.addTrack(id, buf));
+                });
+            }
         };
         return d;
     }
-    
+
 }
 
-class Track{
-    constructor(id, mixer, buffer){
+class Track {
+    constructor(id, mixer, buffer) {
         var self = this;
         this.id = id;
         this.mixer = mixer;
@@ -261,54 +263,54 @@ class Track{
         this.enabled = false;
 
         this.$el = $(".track" + id);
-        this.elToggle = document.getElementById("track"+id+"_toggle");
-        this.elToggle.addEventListener('change', (e)=>{
-            var v= e.target.value;
+        this.elToggle = document.getElementById("track" + id + "_toggle");
+        this.elToggle.addEventListener('change', (e) => {
+            var v = e.target.value;
             self.enabled = !!v;
             if (mixer.playing) {
                 if (self.enabled) {
                     self.start(0, mixer.offset)
-                }else{
+                } else {
                     self.stop();
                 }
             }
         });
-        this.elVol = document.getElementById("track"+id+"_vol");
-        gainNode.gain.value = this.elVol.value/100;
-        this.elVol.addEventListener('change', (e)=>{
-            var v= e.target.value;
-            gainNode.gain.value = v/100;
+        this.elVol = document.getElementById("track" + id + "_vol");
+        gainNode.gain.value = this.elVol.value / 100;
+        this.elVol.addEventListener('change', (e) => {
+            var v = e.target.value;
+            gainNode.gain.value = v / 100;
         });
 
         this.volumeDb = new VolumeIndicator(this.gainNode, document.getElementById("track" + id + "_vol_indi"));
         this.volumeDb.start();
 
         this.$heart = this.$el.find(".heart");
-        this.$heart.on("click", (e)=>{
+        this.$heart.on("click", (e) => {
             console.log("cloned!!!!!");
             var cloneTrack = self.mixer.addTrack(undefined, self.buffer);
             cloneTrack.$el.find(".name").innerText = self.$el.find(".name").innerText;
         });
-        
+
     }
-    start(when, offset){
-        if(!this.enabled) return;
-        if(this.source) this.stop();
+    start(when, offset) {
+        if (!this.enabled) return;
+        if (this.source) this.stop();
         var source = this.source = this.context.createBufferSource();
         source.buffer = this.buffer;
         source.connect(this.input);
         source.start(when, offset);
     }
-    stop(){
-        if(!this.source) return;
+    stop() {
+        if (!this.source) return;
         this.source.stop();
         this.source = null;
     }
 
-    get input(){
+    get input() {
         return this.gainNode;
     }
-    get output(){
+    get output() {
         return this.gainNode;
     }
 
@@ -316,8 +318,8 @@ class Track{
 
 //---------------------------------------------
 // for volume indicator
-class VolumeIndicator{
-    constructor(inputPoint, canvas){
+class VolumeIndicator {
+    constructor(inputPoint, canvas) {
         this.analyzer
         this.canvas = canvas;
         this.canvasWidth = canvas.width;
@@ -331,7 +333,7 @@ class VolumeIndicator{
         this.volume = 0;
     }
     start() {
-        if (!this.rafID){
+        if (!this.rafID) {
             this.rafID = window.requestAnimationFrame(this._draw.bind(this));
         }
     }
@@ -341,19 +343,19 @@ class VolumeIndicator{
             this.rafID = null;
         }
     }
-    _draw(time){
+    _draw(time) {
 
 
         var freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
-        this.analyserNode.getByteFrequencyData(freqByteData); 
+        this.analyserNode.getByteFrequencyData(freqByteData);
         var sum = freqByteData.reduce((a, b) => a + b, 0);
-        this.volume = sum / freqByteData.length/255*100;
+        this.volume = sum / freqByteData.length / 255 * 100;
 
         this.analyserContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.analyserContext.fillStyle = '#F6D565';
         this.analyserContext.lineCap = 'round';
-        this.analyserContext.fillStyle = "hsl( " + Math.round(this.volume/100*360) + ", 100%, 50%)";
-        this.analyserContext.fillRect(0, this.canvasHeight, this.canvasWidth, -this.volume/100*this.canvasHeight);
+        this.analyserContext.fillStyle = "hsl( " + Math.round(this.volume / 100 * 360) + ", 100%, 50%)";
+        this.analyserContext.fillRect(0, this.canvasHeight, this.canvasWidth, -this.volume / 100 * this.canvasHeight);
 
         window.requestAnimationFrame(this._draw.bind(this));
     }
@@ -385,18 +387,18 @@ class RecordDeck {
         window.onorientationchange = this.resizeAnalyzer.bind(this);
         window.onresize = this.resizeAnalyzer.bind(this);
     }
-    ready(){
+    ready() {
         console.log("ready");
         this.resizeAnalyzer();
         this.record();
     }
-    complete(){
+    complete() {
         var self = this;
         this.mixer.metronome.play();
         console.log("complete");
         this.mixer.stop();
         this.stop();
-        this.audioRecorder.getBuffer((buf)=>{
+        this.audioRecorder.getBuffer((buf) => {
             console.log(buf);
             var trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
             var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
@@ -413,13 +415,13 @@ class RecordDeck {
             self.mixer.tracks[0].buffer = ab;
         });
     }
-    open(){
+    open() {
         this.$modal.modal("open");
     }
-    close(){
+    close() {
         this.$modal.modal("close");
     }
-    record(){
+    record() {
         var self = this;
         this.audioRecorder.clear();
         this.audioRecorder.record();
@@ -427,12 +429,12 @@ class RecordDeck {
         var current = this.mixer.context.currentTime;
         $(this.mixer.metronome).off("tick");
         var measures = 0
-        $(this.mixer.metronome).on("tick", function(evt, data){
+        $(this.mixer.metronome).on("tick", function (evt, data) {
             console.log(data);
-            if (data.beat === 0){
+            if (data.beat === 0) {
                 measures += 1;
             }
-            if (measures === 2 && !self.mixer.playing){
+            if (measures === 2 && !self.mixer.playing) {
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -440,10 +442,10 @@ class RecordDeck {
         });
         this.mixer.metronome.play();
     }
-    stop(){
+    stop() {
         this.audioRecorder.stop();
     }
-    resizeAnalyzer(){
+    resizeAnalyzer() {
         var canvas = document.getElementById("rec_analyser");
         var wrapper = canvas.parentElement;
         $(canvas).attr('width', $(wrapper).width());
@@ -471,7 +473,7 @@ class RecordDeck {
             this.analyserContext.fillStyle = '#F6D565';
             this.analyserContext.lineCap = 'round';
             var multiplier = this.analyserNode.frequencyBinCount / numBars;
-            var rate = this.canvasHeight/255;
+            var rate = this.canvasHeight / 255;
             // Draw rectangle for each frequency bin.
             for (var i = 0; i < numBars; ++i) {
                 var magnitude = 0;
@@ -532,7 +534,9 @@ class RecordDeck {
                     "optional": []
                 },
             }, this.gotStream.bind(this), (e) => {
-                alert('Error getting UserMedia audio stream');
+                alert(
+`Error getting UserMedia audio stream.
+If no mic is plugged, plug a mic then reload page.`);
                 console.log(e);
             });
     }
@@ -544,8 +548,8 @@ class RecordDeck {
 //------------------------------
 // metronome
 
-class Metronome{
-    constructor(mixer){
+class Metronome {
+    constructor(mixer) {
         this.context = mixer.context;
         this.isPlaying = false;      // Are we currently playing?
         this.startTime;              // The start time of the entire sequence.
@@ -609,7 +613,7 @@ class Metronome{
 
         osc.start(time);
         osc.stop(time + this.noteLength);
-        $(this).trigger("tick", {beat:beatNumber % 16, time: time});
+        $(this).trigger("tick", { beat: beatNumber % 16, time: time });
     }
 
     scheduler() {
