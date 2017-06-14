@@ -7,39 +7,54 @@
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
     <link rel="stylesheet" href="style.css">
+
+    <script src="lib/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="lib/polymer/polymer.html">
+    <link rel="import" href="lib/webaudio-controls/webaudio-controls.html">
 </head>
 
 <body>
     <header>
         <nav>
-            <div class="nav-wrapper">
-                <a href="#" class="title">Hub</a>
+            <div class="nav-wrapper blue-grey darken-3">
+                <img src="img/hub_logo.png" alt="Hub" class="responsive-img title">
                 <ul id="nav-mobile" class="right">
                     <li>
-                        <div class="col s3 center">
-                            <a class="btn-floating btn-small waves-effect waves-light light-blue" onclick="playSelected()"><i class="material-icons">pause</i></a>
+                        <div class="">
+                            <canvas id="mixer_lcd" style="margin-top:2px"></canvas>
                         </div>
                     </li>
                     <li>
-                        <div class="col s3 center">
-                            <a class="btn-floating btn-small waves-effect waves-light teal" onclick="playSelected()"><i class="material-icons">play_arrow</i></a>
+                        <div class="">
+                            <webaudio-knob id="main_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="42" min="0" max="200"
+                                value="100" style="padding-top: 10px;padding-bottom: 10px;margin-left:15px;margin-right:15px;"></webaudio-knob>
                         </div>
                     </li>
                     <li>
-                        <div class="col s3 center">
-                            <a class="btn-floating btn-small waves-effect waves-light amber" onclick="stop()"><i class="material-icons">stop</i></a>
+                        <div class="">
+                            <a id="main_pause" class="btn-floating btn-small waves-effect waves-light light-blue"><i class="material-icons">pause</i></a>
                         </div>
                     </li>
                     <li>
-                        <div class="col s3 center">
-                            <a href="#modal1" class="modal-trigger btn-floating btn-small waves-effect waves-light red"><i class="material-icons">settings_voice</i></a>
+                        <div class="">
+                            <a id="main_play" class="btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">play_arrow</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="">
+                            <a id="main_stop" class="btn-floating btn-small waves-effect waves-light amber"><i class="material-icons">stop</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="">
+                            <a id="main_rec" class="modal-trigger btn-floating btn-small waves-effect waves-light red"><i class="material-icons">settings_voice</i></a>
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
     </header>
-    <main>
+    <main style="clear:both">
         <div class="container">
             <div class="row valign-wrapper nomargin">
                 <div class="col s12 center">
@@ -50,9 +65,9 @@
             </div>
             <div class="row">
                 <ul id="records" class="collapsible" data-collapsible="expandable">
-                    <!-- ここには↓のテンプレートを使用した内容が挿入されます -->
+
                 </ul>
-                <!-- データ表示用のテンプレート(jQuery Templates 使用)) -->
+
                 <script id="template" type="text/x-jquery-tmpl">
                     <li>
                         <div class="collapsible-header active">
@@ -60,11 +75,18 @@
                         </div>
                         <div class="collapsible-body">
                             {{each(i, record) records}}
-                            <div id="${partId}${i + 1}" class="card-panel">
+                            <div id="${partId}${i}" class="card-panel">
                                 <div class="row valign-wrapper">
                                     <div class="col s1">
-                                        <input type="checkbox" id="${partId}${i + 1}" class="check" value="${partId}${i + 1}" />
-                                        <label for="${partId}${i + 1}"></label>
+                                        <webaudio-switch id="track${partId}${i}_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                    </div>
+                                    <div class="col s1">
+                                        <webaudio-knob id="track${partId}${i}_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0"
+                                            max="200" value="100"></webaudio-knob>
+                                    </div>
+                                    <div class="col s1">
+                                        <canvas id="track${partId}${i}_vol_indi" width="10" height="40"></canvas>
+
                                     </div>
                                     <div class="col s2 m1">
                                         <img src="img/${record.userIcon}" alt="${record.userName}" class="circle responsive-img">
@@ -76,7 +98,7 @@
                                         ${record.userLevel}
                                     </div>
                                     <div class="col s1 m2">
-                                        <a href="#!" onclick="addFavo('${partId}',${i + 1});">
+                                        <a href="#!" class="heart" onclick="addFavo('${partId}', ${i});">
                                             <div class="favo secondary-content valign-wrapper">
                                                 <div>${record.userFavo}</div>
                                             </div>
@@ -88,30 +110,28 @@
                         </div>
                     </li>
                 </script>
-                <!-- テンプレートここまで -->
             </div>
         </div>
     </main>
 
     <!-- モーダルフッター -->
-    <div id="modal1" class="modal bottom-sheet">
+    <div id="rec_modal" class="modal bottom-sheet">
         <div class="modal-content">
             <h4>Modal Header</h4>
-            <p>A bunch of text</p>
-            <p>A bunch of text</p>
-            <p>A bunch of text</p>
-            <p>A bunch of text</p>
-            <p>A bunch of text</p>
+            <p>
+                <canvas id="rec_analyser" width="1024" height="100"></canvas>
+            </p>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
         </div>
     </div>
 
-
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src='http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+    <script src="lib/recorder.js"></script>
+    <script src="lib/canvasLCD.js"></script>
     <script src="index.js"></script>
     <script>
         /**
@@ -156,29 +176,34 @@
                     "partName": "ドラム",
                     "partIcon": "drum.svg",
                     "records": [
-
                     ]
                 }
             ];
 
+
         /**
-        * 初期表示生成処理
+        * 初期設定処理
         */
         $(document).ready(function () {
             $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
-            $('.modal').modal();
+            const mixer = window.mixer = new Mixer();
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < data[i].records.length; j++) {
+                    const trackId = data[i].partId + j.toString();
+                    mixer.loadAudioBuffer(trackId, trackId);
+                }
+            }
         });
 
         /**
         * イベントハンドル関数
         */
-        function playSelected() {
-            const checked = $('[class="check"]:checked').map(function () {
-                //$(this)でjQueryオブジェクトが取得できる。val()で値をvalue値を取得。
-                return $(this).val();
-            }).get();
-            play(checked);
+
+        // いいねのカウントアップ
+        function addFavo(partId, sequence) {
+            const favo = parseInt($('#' + partId + sequence + ' div.favo div').text());
+            $('#' + partId + sequence + ' div.favo div').text(favo + 1);
         }
 
         function addFavo(partId, sequence) {
