@@ -1,0 +1,22 @@
+{
+  "rules": {
+    ".read": true,
+    "users": {
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "playrooms": {
+      "$playroom": {
+        ".write": "auth != null && (!data.exists() || data.child('owner').val() === auth.uid)",
+        ".validate": "newData.child('owner').val() == auth.uid"
+      }
+    },
+    "tracks": {
+      "$track": {
+        ".write": "auth != null && (!data.exists() || data.child('player').val() == auth.uid)",
+        ".validate": "newData.child('player').val() == auth.uid"
+      }
+    }
+  }
+}
