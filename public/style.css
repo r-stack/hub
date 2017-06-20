@@ -46,12 +46,35 @@ body{
     width: 3px;
     height: 100px;
     margin: 0px auto;
-    background-color: #000000;
+    box-shadow: 0px 3px 15px rgba(0,0,0,0.5);
     transform-origin: bottom center;
 }
-.left-45deg{
-    transform: rotate(-45deg);
+
+.metronome-box{
+    position: relative;
+    padding: 30px !important;
 }
-.right-45deg{
-    transform: rotate(45deg);
+
+.metronome-tick-box{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 30px;
+    margin: 0px auto;
+    width: 20px;
+    height: 100px;
+    transform-origin: bottom center;
+}
+
+.left-30deg{
+    transform: rotate(-30deg);
+}
+.right-30deg{
+    transform: rotate(30deg);
+}
+.left-60deg{
+    transform: rotate(-60deg);
+}
+.right-60deg{
+    transform: rotate(60deg);
 }

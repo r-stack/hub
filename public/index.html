@@ -128,7 +128,16 @@
     <!-- モーダルフッター -->
     <div id="rec_modal" class="modal bottom-sheet">
         <div class="modal-content">
-            <div id="metronome_needle" class="metronome-needle left-45deg"></div>
+            <div class="row">
+                <div class="metronome-box card-panel z-depth-4 col s10 offset-s1 m6 offset-m3 l4 offset-l4 blue-grey darken-4">
+                    <div class="metronome-tick-box red-text text-darken-4">●</div>
+                    <div class="metronome-tick-box left-30deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box right-30deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box left-60deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box right-60deg grey-text text-lighten-4">●</div>
+                    <div id="metronome_needle" class="metronome-needle left-60deg blue-grey lighten-5"></div>
+                </div>
+            </div>
             <p>
                 <canvas id="rec_analyser" width="1024" height="100"></canvas>
             </p>

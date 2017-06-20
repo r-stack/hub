@@ -610,8 +610,8 @@ class Metronome {
             return; // we're not playing non-quarter 8th notes
         
         // Swing the metronome needle.
-        this.needle.toggleClass("left-45deg");
-        this.needle.toggleClass("right-45deg");
+        this.needle.toggleClass("left-60deg");
+        this.needle.toggleClass("right-60deg");
 
         if ((-1 < throughoutCount && throughoutCount < 4)
             || (4 < throughoutCount && throughoutCount < 12)
