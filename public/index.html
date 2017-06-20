@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Welcome to hub</title>
@@ -128,7 +128,16 @@
     <!-- モーダルフッター -->
     <div id="rec_modal" class="modal bottom-sheet">
         <div class="modal-content">
-            <h4>Modal Header</h4>
+            <div class="row">
+                <div class="metronome-box card-panel z-depth-4 col s10 offset-s1 m6 offset-m3 l4 offset-l4 blue-grey darken-4">
+                    <div class="metronome-tick-box red-text text-darken-4">●</div>
+                    <div class="metronome-tick-box left-30deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box right-30deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box left-60deg grey-text text-lighten-4">●</div>
+                    <div class="metronome-tick-box right-60deg grey-text text-lighten-4">●</div>
+                    <div id="metronome_needle" class="metronome-needle left-60deg blue-grey lighten-5"></div>
+                </div>
+            </div>
             <p>
                 <canvas id="rec_analyser" width="1024" height="100"></canvas>
             </p>
@@ -140,39 +149,39 @@
 
     <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
     <script>
-      // Initialize Firebase
-      var config = {
-        apiKey: "AIzaSyBccRAtQbdRaXgHt29Ok32T_7Udd0FsfGc",
-        authDomain: "rhd2017-hub.firebaseapp.com",
-        databaseURL: "https://rhd2017-hub.firebaseio.com",
-        projectId: "rhd2017-hub",
-        storageBucket: "rhd2017-hub.appspot.com",
-        messagingSenderId: "141729982664"
-      };
-      firebase.initializeApp(config);
-
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBccRAtQbdRaXgHt29Ok32T_7Udd0FsfGc",
+            authDomain: "rhd2017-hub.firebaseapp.com",
+            databaseURL: "https://rhd2017-hub.firebaseio.com",
+            projectId: "rhd2017-hub",
+            storageBucket: "rhd2017-hub.appspot.com",
+            messagingSenderId: "141729982664"
+        };
+        firebase.initializeApp(config);
+        
     </script>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        document.addEventListener('DOMContentLoaded', function() {
+            // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+            // // The Firebase SDK is initialized and available here!
+            //
+            // firebase.auth().onAuthStateChanged(user => { });
+            // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+            // firebase.messaging().requestPermission().then(() => { });
+            // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+            //
+            // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-        try {
-          let app = firebase.app();
-          let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-           console.log(`Firebase SDK loaded with ${features.join(', ')}`);
-        } catch (e) {
-          console.error(e);
-          console.log('Error loading the Firebase SDK, check the console.');
-        }
-      });
+            try {
+                let app = firebase.app();
+                let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
+                console.log(`Firebase SDK loaded with ${features.join(', ')}`);
+            } catch (e) {
+                console.error(e);
+                console.log('Error loading the Firebase SDK, check the console.');
+            }
+        });
     </script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src='https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js'></script>

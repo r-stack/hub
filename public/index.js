@@ -434,7 +434,7 @@ class RecordDeck {
             if (data.beat === 0) {
                 measures += 1;
             }
-            if (measures === 2 && !self.mixer.playing) {
+            if (measures === 1 && !self.mixer.playing) {
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -535,7 +535,7 @@ class RecordDeck {
                 },
             }, this.gotStream.bind(this), (e) => {
                 alert(
-`Error getting UserMedia audio stream.
+                    `Error getting UserMedia audio stream.
 If no mic is plugged, plug a mic then reload page.`);
                 console.log(e);
             });
@@ -553,6 +553,7 @@ class Metronome {
         this.context = mixer.context;
         this.isPlaying = false;      // Are we currently playing?
         this.startTime;              // The start time of the entire sequence.
+        this.throughoutNote;         // The throughout sum 16-beats are hit.
         this.current16thNote;        // What note is currently last scheduled?
         this.tempo = 120.0;          // tempo (in beats per minute)
         this.lookahead = 25.0;       // How frequently to call scheduling function 
@@ -579,6 +580,11 @@ class Metronome {
                 console.log("message: " + e.data);
         };
         this.timerWorker.postMessage({ "interval": this.lookahead });
+
+        // Get DOM of metronome needle and setup.
+        this.needle = $("#metronome_needle");
+        this.needleToLeft = true;
+        this.needle.css({ "transition": "transform " + 60.0 / this.tempo + "s linear" });
     }
     nextNote() {
         // Advance current note and time by a 16th note...
@@ -590,9 +596,11 @@ class Metronome {
         if (this.current16thNote == 16) {
             this.current16thNote = 0;
         }
+
+        this.throughoutNote++;
     }
 
-    scheduleNote(beatNumber, time) {
+    scheduleNote(beatNumber, time, throughoutCount) {
         // push the note on the queue, even if we're not playing.
         this.notesInQueue.push({ note: beatNumber, time: time });
 
@@ -600,6 +608,16 @@ class Metronome {
             return; // we're not playing non-8th 16th notes
         if ((this.noteResolution == 2) && (beatNumber % 4))
             return; // we're not playing non-quarter 8th notes
+        
+        // Swing the metronome needle.
+        this.needle.toggleClass("left-60deg");
+        this.needle.toggleClass("right-60deg");
+
+        if ((-1 < throughoutCount && throughoutCount < 4)
+            || (4 < throughoutCount && throughoutCount < 12)
+            || (12 < throughoutCount && throughoutCount < 20)) {
+            return; // start with .x.x.xxxX
+        }
 
         // create an oscillator
         var osc = this.context.createOscillator();
@@ -620,7 +638,7 @@ class Metronome {
         // while there are notes that will need to play before the next interval, 
         // schedule them and advance the pointer.
         while (this.nextNoteTime < this.context.currentTime + this.scheduleAheadTime) {
-            this.scheduleNote(this.current16thNote, this.nextNoteTime);
+            this.scheduleNote(this.current16thNote, this.nextNoteTime, this.throughoutNote);
             this.nextNote();
         }
     }
@@ -630,6 +648,7 @@ class Metronome {
 
         if (this.isPlaying) { // start playing
             this.current16thNote = 0;
+            this.throughoutNote = 0;
             this.nextNoteTime = this.context.currentTime;
             this.timerWorker.postMessage("start");
             return "stop";
