@@ -41,3 +41,17 @@ body{
 .favo div{
     margin: 0px auto;
 }
+
+.metronome-needle{
+    width: 3px;
+    height: 100px;
+    margin: 0px auto;
+    background-color: #000000;
+    transform-origin: bottom center;
+}
+.left-45deg{
+    transform: rotate(-45deg);
+}
+.right-45deg{
+    transform: rotate(45deg);
+}

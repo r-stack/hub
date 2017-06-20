@@ -580,6 +580,11 @@ class Metronome {
                 console.log("message: " + e.data);
         };
         this.timerWorker.postMessage({ "interval": this.lookahead });
+
+        // Get DOM of metronome needle and setup.
+        this.needle = $("#metronome_needle");
+        this.needleToLeft = true;
+        this.needle.css({ "transition": "transform " + 60.0 / this.tempo + "s linear" });
     }
     nextNote() {
         // Advance current note and time by a 16th note...
@@ -599,15 +604,20 @@ class Metronome {
         // push the note on the queue, even if we're not playing.
         this.notesInQueue.push({ note: beatNumber, time: time });
 
+        if ((this.noteResolution == 1) && (beatNumber % 2))
+            return; // we're not playing non-8th 16th notes
+        if ((this.noteResolution == 2) && (beatNumber % 4))
+            return; // we're not playing non-quarter 8th notes
+        
+        // Swing the metronome needle.
+        this.needle.toggleClass("left-45deg");
+        this.needle.toggleClass("right-45deg");
+
         if ((-1 < throughoutCount && throughoutCount < 4)
             || (4 < throughoutCount && throughoutCount < 12)
             || (12 < throughoutCount && throughoutCount < 20)) {
             return; // start with .x.x.xxxX
         }
-        if ((this.noteResolution == 1) && (beatNumber % 2))
-            return; // we're not playing non-8th 16th notes
-        if ((this.noteResolution == 2) && (beatNumber % 4))
-            return; // we're not playing non-quarter 8th notes
 
         // create an oscillator
         var osc = this.context.createOscillator();
