@@ -17,18 +17,18 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
 
-    <script src="lib/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <link rel="import" href="lib/polymer/polymer.html">
-    <link rel="import" href="lib/webaudio-controls/webaudio-controls.html">
+    <script src="/lib/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="/lib/polymer/polymer.html">
+    <link rel="import" href="/lib/webaudio-controls/webaudio-controls.html">
 </head>
 
 <body>
     <header>
         <nav>
             <div class="nav-wrapper blue-grey darken-3">
-                <img src="img/hub_logo.png" alt="Hub" class="responsive-img title">
+                <img src="/img/hub_logo.png" alt="Hub" class="responsive-img title">
                 <ul id="nav-mobile" class="right">
                     <li>
                         <div class="">
@@ -37,7 +37,7 @@
                     </li>
                     <li>
                         <div class="">
-                            <webaudio-knob id="main_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="42" min="0" max="200"
+                            <webaudio-knob id="main_vol" src="/lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="42" min="0" max="200"
                                 value="100" style="padding-top: 10px;padding-bottom: 10px;margin-left:15px;margin-right:15px;"></webaudio-knob>
                         </div>
                     </li>
@@ -54,6 +54,12 @@
                     <li>
                         <div class="">
                             <a id="main_stop" class="btn-floating btn-small waves-effect waves-light amber"><i class="material-icons">stop</i></a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="main_auth">
+                            <a id="main_signin" class="waves-effect waves-light btn-large"><i class="material-icons right">person</i>Sign in</a>
+                            <img id="username" height="40" style="margin-top:12px;padding:0 5px"/>
                         </div>
                     </li>
                     <li>
@@ -82,17 +88,17 @@
                 <script id="template" type="text/x-jquery-tmpl">
                     <li>
                         <div class="collapsible-header active">
-                            <img src="img/${partIcon}" width="24" height="24" class="insticon">${partName}
+                            <img src="/img/${partIcon}" width="24" height="24" class="insticon">${partName}
                         </div>
                         <div class="collapsible-body">
                             {{each(i, record) records}}
                             <div id="${partId}${i}" class="card-panel">
                                 <div class="row valign-wrapper">
                                     <div class="col s1">
-                                        <webaudio-switch id="track${partId}${i}_toggle" src="lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                                        <webaudio-switch id="track${partId}${i}_toggle" src="/lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
                                     </div>
                                     <div class="col s1">
-                                        <webaudio-knob id="track${partId}${i}_vol" src="lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0"
+                                        <webaudio-knob id="track${partId}${i}_vol" src="/lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0"
                                             max="200" value="100"></webaudio-knob>
                                     </div>
                                     <div class="col s1">
@@ -100,7 +106,7 @@
 
                                     </div>
                                     <div class="col s2 m1">
-                                        <img src="img/${record.userIcon}" alt="${record.userName}" class="circle responsive-img">
+                                        <img src="/img/${record.userIcon}" alt="${record.userName}" class="circle responsive-img">
                                     </div>
                                     <div class="name col s4">
                                         ${record.userName}
@@ -170,25 +176,25 @@
             // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
             // firebase.messaging().requestPermission().then(() => { });
             // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-            //
-            // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        //
+        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-            try {
-                let app = firebase.app();
-                let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-                console.log(`Firebase SDK loaded with ${features.join(', ')}`);
-            } catch (e) {
-                console.error(e);
-                console.log('Error loading the Firebase SDK, check the console.');
-            }
-        });
+        try {
+          let app = firebase.app();
+          let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
+           console.log(`Firebase SDK loaded with ${features.join(', ')}`);
+        } catch (e) {
+          console.error(e);
+          console.log('Error loading the Firebase SDK, check the console.');
+        }
+      });
     </script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src='https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
-    <script src="lib/recorder.js"></script>
-    <script src="lib/canvasLCD.js"></script>
-    <script src="index.js"></script>
+    <script src="/lib/recorder.js"></script>
+    <script src="/lib/canvasLCD.js"></script>
+    <script src="/index.js"></script>
     <script>
         /**
         * 表示用データ
@@ -241,6 +247,9 @@
         * 初期設定処理
         */
         $(document).ready(function () {
+            window.app = new HubApp();
+            window.app.start();
+            window.auth = new AuthView().render();
             $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
             const mixer = window.mixer = new Mixer();

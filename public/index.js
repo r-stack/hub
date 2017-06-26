@@ -1,118 +1,185 @@
 
 
-//var SOUND_URL = '/sound/n127.mp3';
-//var SOUND_URL2 = '/sound/Moonlight.mp3';
+// Media API
+if (!navigator.getUserMedia)
+    navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+if (!navigator.cancelAnimationFrame)
+    navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+if (!navigator.requestAnimationFrame)
+    navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
 
-var SupportedAudioContext;
-try {
-    SupportedAudioContext = window.AudioContext || window.webkitAudioContext;
-} catch (e) {
-    throw new Error('Web Audio API is not supported.');
+
+if (!window.AudioContext){
+    window.AudioContext = window.webkitAudioContext;
 }
-var context;
 
 
-var source;
-var ctrls;
+class App{
+    constructor(){
+        this.handlers = [];
 
-function play(targets) {
-    if (!targets || targets.length === 0) {
-        return;
+        if (typeof window !== 'undefined') {
+            this.location = window.location;
+            this.history = window.history;
+        }
     }
-    if (!context) {
-        context = new SupportedAudioContext();
+    start(){
+        //popstate
+        window.addEventListener("popstate", this.__checkUrl, false); 
+        this.loadUrl(this.location.pathname);
     }
 
-    ctrls = new Array();
+    stop(){
+        window.removeEventListener("popstate", this.__checkUrl, false)
+    }
 
-    var dffs = new Array();
-
-    $.each(targets, function (i, target) {
-
-        var url = '/sound/' + target + '.mp3';
-
-
-        var request = new XMLHttpRequest();
-        request.open('GET', url, true);
-        request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
-        request.send();
-
-
-        var d = new $.Deferred;
-        request.onload = function () {
-            // contextにArrayBufferを渡し、decodeさせる
-            context.decodeAudioData(request.response, function (buf) {
-                //                buffer = buf;
-                ctrls.push(createSource(buf));
-                d.resolve();
-            });
-        };
-
-        dffs.push(d);
-    });
-
-
-    $.when.apply($, dffs).then(function () {
-
-        $.each(ctrls, function (i, ctrl) {
-
-            ctrl.source.connect(context.destination);
-            ctrl.source.start(0);
+    navigate(fragment, options){
+        if(options.replace){
+            this.history.replaceState({}, document.title, fragment);
+        }else{
+            this.history.pushState({}, document.title, fragment);
+        }
+        this.loadUrl(fragment);
+    }
+    loadUrl(fragment){
+        this.handlers.some(handle=>{
+            if(handle.route.test(fragment)){
+                handle.callback.apply(this, fragment.match(handle.route));
+                return true;
+            }
         });
-    });
+    }
 
+    route(pattern, callback){
+        this.handlers.push({route:pattern, callback:callback});
+    }
 
+    __checkUrl(){
+        console.log("__checkUrl");
+    }
+}
+class HubApp extends App{
 
-};
+    constructor(){
+        super();
+        this.$el = $("main");
 
+        this.init();
+    }
 
-function createSource(buffer) {
-    var source = context.createBufferSource();
-    var gainNode = context.createGain ? context.createGain() : context.createGainNode();
-    source.buffer = buffer;
-    // Turn on looping
-    source.loop = true;
-    // Connect source to gain.
-    source.connect(gainNode);
-    // Connect gain to destination.
-    gainNode.connect(context.destination);
+    init(){
+        this.route(/^$/, this.home);
+        this.route(/^\/playrooms\/$/, this.listrooms);
+        this.route(/^\/playrooms\/(\d+)$/, this.playroom);
+    }
 
-    return {
-        source: source,
-        gainNode: gainNode
-    };
+    home(){
+        console.log("home");
+    }
+    listrooms(){
+        console.log("playrooms");
+    }
+    playroom(path, id){
+        console.log("playroom", arguments);
+        //TODO: hide other view
+        firebase.db().ref(path).once("value", snap=>{
+            let playroom = snap.value();
+            //TODO: create mixer;
+            //TODO: render playrooms( title, tempo, instruments)
+            //TODO: activate
+            firebase.db().ref("/tracks/" + id).on("value", snap_tracks=>{
+                console.log("value: /tracks/" + id);
+                let tracks = snap_tracks.val();
+            });
+        })
+    }
+
 }
 
-function stop() {
-    $.each(ctrls, function (i, ctrl) {
-        ctrl.source.stop();
-    });
-}
+class AuthView {
+    constructor() {
+        this.$el = $(".main_auth");
+        this.auth = firebase.auth();
+        console.log(this.auth);
+        this.init();
+    }
 
+    init(){
+        var self = this;
 
-function rec(category) {
-    console.log("rec")
-}
+        this.$el.on("click", "#main_signin", function(){
+            console.log("start login process");
+            self.login();
+        });
+        this.$el.on("click", "#username", function(){
+            console.log("start logout process");
+            self.logout();
+        });
 
+        this.auth.onAuthStateChanged(function (user) {
+            self.user = user;
+            self.update();
+            if (user) {
+                console.log("User is signed in.");
+            } else {
+                console.log("No user is signed in.");
+            }
+        });
+        return this;
+    }
+    
+    render(){
+        this.update();
+        return this;
+    }
+    update(){
+        if(this.auth.currentUser){
+            this.$el.find("#main_signin").hide();
+            this.$el.find("#username").attr("src", this.auth.currentUser.photoURL).show();
+        }else{
+            this.$el.find("#main_signin").show();
+            this.$el.find("#username").attr("src", "").hide();
+        }
+        return this
+    }
+    login() {
+        var self = this;
+        var provider = new firebase.auth.GithubAuthProvider();
+        firebase.auth().signInWithPopup(provider).then(function (result) {
+            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+            var token = result.credential.accessToken;
+            // The signed-in user info.
+            var user = result.user;
+            self.user = user;
+        }).catch(function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // The email of the user's account used.
+            var email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            var credential = error.credential;
+            alert("Login Failed.");
+        });
+    }
+    logout(){
+        this.auth.signOut().then(function () {
+            console.log('Sign-out successful.');
+            
+        }, function (error) {
+            console.log('Sign-out with An error happened');
+        });
+    }
 
-
-
-function test01() {
-    t1_indi = new VolumeIndicator(ctrls[0].source, document.getEementById("t1_indi"));
-    t1_indi.start();
-}
-function test02() {
-    var m = window.m = new Mixer();
-    m.loadAudioBuffer("0", "v1");
-    m.loadAudioBuffer("1", "g1");
-    window.r = new RecordDeck(m);
-    window.metro = new Metronome(m);
 }
 
 
 //---------------------------------------------
 // Mixer
 //
+/**
+ * Mixer
+ */
 class Mixer {
     constructor() {
         this.musicTitle = "MARCH OF KOALA";
@@ -228,7 +295,7 @@ class Mixer {
     loadAudioBuffer(id, target) {
         var self = this;
         var url = '/sound/' + target + '.mp3';
-
+        console.log(url);
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
@@ -377,7 +444,11 @@ class RecordDeck {
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
         this.analyserContext = canvas.getContext('2d');
-        this.initAudio();
+        this.lazy = true;
+        this._audio_inited = false;
+        if(!this.lazy){
+            this.initAudio();
+        }
 
         this.$modal = $("#rec_modal").modal({
             ready: this.ready.bind(this),
@@ -401,22 +472,38 @@ class RecordDeck {
         this.audioRecorder.getBuffer((buf) => {
             console.log(buf);
             var trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
-            var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
-            console.log(ab);
-            for (var channel = 0; channel < 2; channel++) {
-                // 実際のデータの配列を得る
-                var nowBuffering = ab.getChannelData(channel);
-                for (var i = 0; i < nowBuffering.length; i++) {
-                    // Math.random()は[0; 1.0]である
-                    // 音声は[-1.0; 1.0]である必要がある
-                    nowBuffering[i] = buf[channel][trimIndex + i];
+            if (buf[0].length - trimIndex > 0) {
+                var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
+                console.log(ab);
+                for (var channel = 0; channel < 2; channel++) {
+                    // 実際のデータの配列を得る
+                    var nowBuffering = ab.getChannelData(channel);
+                    for (var i = 0; i < nowBuffering.length; i++) {
+                        // Math.random()は[0; 1.0]である
+                        // 音声は[-1.0; 1.0]である必要がある
+                        nowBuffering[i] = buf[channel][trimIndex + i];
+                    }
                 }
+                self.mixer.tracks[0].buffer = ab;
+                console.log(ab.length);
+            }else{
+                console.log("no rec data.");
             }
-            self.mixer.tracks[0].buffer = ab;
+            self.clearStream();
         });
     }
+    clearStream(){
+        if(this.stream){
+            this.stream.getTracks().forEach(tr=>tr.stop());
+            this._audio_inited = false;
+        }
+    }
     open() {
-        this.$modal.modal("open");
+        if (this._audio_inited) {
+            this.$modal.modal("open");
+        } else {
+            this.initAudio();
+        }
     }
     close() {
         this.$modal.modal("close");
@@ -434,7 +521,7 @@ class RecordDeck {
             if (data.beat === 0) {
                 measures += 1;
             }
-            if (measures === 1 && !self.mixer.playing) {
+            if (measures === 3 && !self.mixer.playing) {
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -454,8 +541,10 @@ class RecordDeck {
 
     }
     cancelAnalyserUpdates() {
-        window.cancelAnimationFrame(rafID);
-        this.rafID = null;
+        if(this.rafID){
+            window.cancelAnimationFrame(this.rafID);
+            this.rafID = null;
+        }
     }
 
     updateAnalysers(time) {
@@ -493,6 +582,7 @@ class RecordDeck {
 
 
     gotStream(stream) {
+        this.stream = stream;
         var inputPoint = this.audioContext.createGain();
 
         // Create an AudioNode from the stream.
@@ -512,16 +602,14 @@ class RecordDeck {
         inputPoint.connect(zeroGain);
         zeroGain.connect(this.audioContext.destination);
         this.updateAnalysers();
+
+        this._audio_inited = true;
+        if(this.lazy){
+            this.open();
+        }
     }
 
     initAudio() {
-        if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        if (!navigator.cancelAnimationFrame)
-            navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
-        if (!navigator.requestAnimationFrame)
-            navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
-
         navigator.getUserMedia(
             {
                 "audio": {
@@ -569,7 +657,7 @@ class Metronome {
         // and may or may not have played yet. {note, time}
         this.timerWorker = null;     // The Web Worker used to fire timer messages
 
-        this.timerWorker = new Worker("metronomeworker.js");
+        this.timerWorker = new Worker("/metronomeworker.js");
         var self = this;
         this.timerWorker.onmessage = function (e) {
             if (e.data == "tick") {
@@ -613,11 +701,11 @@ class Metronome {
         this.needle.toggleClass("left-60deg");
         this.needle.toggleClass("right-60deg");
 
-        if ((-1 < throughoutCount && throughoutCount < 4)
-            || (4 < throughoutCount && throughoutCount < 12)
-            || (12 < throughoutCount && throughoutCount < 20)) {
-            return; // start with .x.x.xxxX
-        }
+        // if ((-1 < throughoutCount && throughoutCount < 4)
+        //     || (4 < throughoutCount && throughoutCount < 12)
+        //     || (12 < throughoutCount && throughoutCount < 20)) {
+        //     return; // start with .x.x.xxxX
+        // }
 
         // create an oscillator
         var osc = this.context.createOscillator();
