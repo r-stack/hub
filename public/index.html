@@ -240,10 +240,9 @@
         $(document).ready(function () {
             window.app = new HubApp();
             window.app.start();
-            window.auth = new AuthView().render();
             $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
-            const mixer = window.mixer = new Mixer();
+            const mixer = window.app.mixer;
             for (let i = 0; i < data.length; i++) {
                 for (let j = 0; j < data[i].records.length; j++) {
                     const trackId = data[i].partId + j.toString();

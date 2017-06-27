@@ -13,7 +13,11 @@ if (!window.AudioContext){
     window.AudioContext = window.webkitAudioContext;
 }
 
-
+/**
+ * Applicationのベースクラス
+ * 機能
+ * - pushStateによるSPA画面遷移
+ */
 class App{
     constructor(){
         this.handlers = [];
@@ -63,31 +67,58 @@ class HubApp extends App{
     constructor(){
         super();
         this.$el = $("main");
+        //AuthView
+        this.auth = new AuthView();
+        //LCD
+        //init LCD
+        this.lcd = new CanvasLCD('06');
+
+        //init mixer
+        this.mixer = new Mixer(this);
 
         this.init();
+        this.render();
     }
 
     init(){
+        //initialize router settings
         this.route(/^$/, this.home);
         this.route(/^\/playrooms\/$/, this.listrooms);
-        this.route(/^\/playrooms\/(\d+)$/, this.playroom);
+        this.route(/^\/playrooms\/(\S+)$/, this.playroom);
+
     }
+
+    /**
+     * rendering global level components.
+     * - auth
+     * - lcd
+     * - menu
+     */
+    render(){
+
+        this.auth.render();
+        return this;        
+    }
+
 
     home(){
         console.log("home");
+        // init application message
+        this.lcd.init('mixer_lcd', "LET'S PLAY.", true);
     }
     listrooms(){
-        console.log("playrooms");
+        console.log("PAGE: PLAYROOM LIST", arguments);
     }
     playroom(path, id){
-        console.log("playroom", arguments);
+        console.log("PAGE: PLAYROOM DETAIL", arguments);
+        console.log(this);
         //TODO: hide other view
-        firebase.db().ref(path).once("value", snap=>{
-            let playroom = snap.value();
+        firebase.database().ref(path).once("value", snap=>{
+            let playroom = snap.val();
             //TODO: create mixer;
             //TODO: render playrooms( title, tempo, instruments)
             //TODO: activate
-            firebase.db().ref("/tracks/" + id).on("value", snap_tracks=>{
+            firebase.database().ref("/tracks/" + id).on("value", snap_tracks=>{
                 console.log("value: /tracks/" + id);
                 let tracks = snap_tracks.val();
             });
@@ -181,7 +212,8 @@ class AuthView {
  * Mixer
  */
 class Mixer {
-    constructor() {
+    constructor(app) {
+        this.app = app || window.app;
         this.musicTitle = "MARCH OF KOALA";
         this.tracks = [];
         this.context = new window.AudioContext();
@@ -196,26 +228,27 @@ class Mixer {
         this.recorddeck = new RecordDeck(this);
 
         //init LCD
-        this.lcd = new CanvasLCD('06');
-        this.lcd.init('mixer_lcd', this.musicTitle, true);
+        this.lcd = this.app.lcd;
+        this.lcd.init('mixer_lcd', this.musicTitle, false);
 
         //dom event
         $("#main_vol").on("change", (e) => {
             var v = e.target.value;
             self.gainNode.gain.value = v / 100;
         });
-        $("#main_play").on("click", (e) => {
+        this.$btnPlay = $("#main_play").on("click", (e) => {
             self.play();
         });
-        $("#main_pause").on("click", (e) => {
+        this.$btnPause = $("#main_pause").on("click", (e) => {
             self.pause();
-        });
-        $("#main_stop").on("click", (e) => {
+        }).hide();
+        this.$btnStop = $("#main_stop").on("click", (e) => {
             self.stop();
-        });
+        }).addClass("disabled");
         $("#main_rec").on("click", (e) => {
             self.rec();
         });
+
     }
     get offset() {
         if (this.playing) {
@@ -242,12 +275,20 @@ class Mixer {
         this._startTime = _startTime;
         this._playing = true;
         this._startLCD();
+
+        this.$btnPlay.hide();
+        this.$btnPause.show();
+        this.$btnStop.removeClass("disabled");
     }
     pause() {
         this.tracks.forEach((track) => track.stop());
         this._offsetTime = this.offset;
         this._playing = false;
         this._stopLCD();
+        
+        this.$btnPlay.show();
+        this.$btnPause.hide();
+        this.$btnStop.addClass("disabled");
     }
     stop() {
         this.tracks.forEach((track) => track.stop());
@@ -255,12 +296,20 @@ class Mixer {
         this._playing = false;
         this._drawLCD();
         this._stopLCD();
+        
+        this.$btnPlay.show();
+        this.$btnPause.hide();
+        this.$btnStop.addClass("disabled");
     }
     rec() {
         var self = this;
         if (this.playing) return;
         this._offsetTime = 0;
         this.recorddeck.open();
+        
+        this.$btnPlay.hide();
+        this.$btnPause.show();
+        this.$btnStop.removeClass("disabled");
     }
 
     _startLCD() {

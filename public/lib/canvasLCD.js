@@ -143,7 +143,7 @@ var CanvasLCD = function(lcdType) {
       var intervalSec = 600;
       var seqCount = 0;
       var that = this;
-      intervalID = setInterval(
+      var intervalID = setInterval(
         function() {
           that.write2Display('init', 'SPACE');
           that.write2Display(sequence[seqCount].mode, sequence[seqCount].letters);
