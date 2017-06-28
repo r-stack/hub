@@ -63,13 +63,119 @@
         </nav>
     </header>
     <main style="clear:both">
-        <div class="container">
-            <div class="row valign-wrapper nomargin">
+        <div id="page01_home" class="container">
+        </div>
+        <div id="page02_listrooms" class="container">
+        </div>
+        <div id="page03_playroom" class="container">
+            <div class="musicinfo row valign-wrapper nomargin">
                 <div class="col s12 center">
                     <h5>
                         課題曲: コアラのマーチ
                     </h5>
                 </div>
+            </div>
+
+            <div class="row">
+                <ul class="collection with-header">
+                    <li class="collection-header"> 
+                        <a class="secondary-content btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">add</i></a>
+ 
+                        <h5><img src="/img/mic.svg" width="24" height="24" class="insticon">ぼーかる</h5>
+                    </li>
+                    <li class="collection-item">
+                        <a class="track_rec secondary-content"><i class="material-icons red-text">mic</i></a>
+                        <a class="track_clear secondary-content"><i class="material-icons">clear</i></a>
+                        <div class="valign-wrapper">
+                            <div class="col s1">
+                                <webaudio-switch id="trackv0_toggle" src="/lib/webaudio-controls/img/switch_toggle.png" width="52"
+                                    height="52">
+                                    <div id="wac-body" class="style-scope webaudio-switch" style="background: rgba(0, 0, 0, 0);">
+                                        <div id="wac-switch" class="style-scope webaudio-switch" style="width: 52px; height: 52px; background: url(&quot;/lib/webaudio-controls/img/switch_toggle.png&quot;) 0px 0px / 100% 200%;"></div>
+                                        <div id="wac-tooltip-box" class="style-scope webaudio-switch"><span id="wac-tooltip-text" class="style-scope webaudio-switch"></span></div>
+                                    </div>
+                                    <div class="style-scope webaudio-switch">
+                                        <nav id="context-menuKnob" class="context-menu style-scope webaudio-switch">
+                                            <ul class="context-menu__items style-scope webaudio-switch">
+                                                <li class="context-menu__item style-scope webaudio-switch" id="context-menu-learn">
+                                                    Learn
+                                                </li>
+                                                <li class="context-menu__item style-scope webaudio-switch">
+                                                    Clear
+                                                </li>
+                                                <li class="context-menu__item style-scope webaudio-switch">
+                                                    Close
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+
+                                </webaudio-switch>
+                            </div>
+                            <div class="col s1">
+                                <webaudio-knob id="trackv0_vol" src="/lib/webaudio-controls/img/LittlePhatty.png" sprites="100"
+                                    diameter="32" min="0" max="200" value="100">
+                                    <div class="wac-body style-scope webaudio-knob" id="wac-body" touch-action="none" style="width: 32px; height: 32px;">
+                                        <div id="wac-knob" touch-action="none" class="style-scope webaudio-knob" style="background: url(&quot;/lib/webaudio-controls/img/LittlePhatty.png&quot;) 0px -1600px / 100% 10100%; width: 32px; height: 32px; transform: rotate(0deg);"></div>
+                                        <div id="wac-valuetip-row" class="style-scope webaudio-knob"><span id="wac-valuetip" touch-action="none" class="style-scope webaudio-knob">100</span></div>
+                                        <div id="wac-tooltip-box" class="style-scope webaudio-knob"><span id="wac-tooltip-text" class="style-scope webaudio-knob"> </span></div>
+                                    </div>
+                                    <div class="style-scope webaudio-knob">
+                                        <nav id="context-menuKnob" class="context-menu style-scope webaudio-knob">
+                                            <ul class="context-menu__items style-scope webaudio-knob">
+                                                <li class="context-menu__item style-scope webaudio-knob" id="context-menu-learn">
+                                                    Learn
+                                                </li>
+                                                <li class="context-menu__item style-scope webaudio-knob">
+                                                    Clear
+                                                </li>
+                                                <li class="context-menu__item style-scope webaudio-knob">
+                                                    Close
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+
+                                </webaudio-knob>
+                            </div>
+                            <div class="col s1">
+                                <canvas id="trackv0_vol_indi" width="10" height="40"></canvas>
+                            </div>
+                            <div class="col s2 m1"> <img src="/img/hanako.png" alt="hanako" class="circle responsive-img"> </div>
+                            <div class="name col s4">
+                            hanako </div>
+                            <div class="col s3"> Level2 </div>
+                            <div class="col s1 m2">
+                                <a href="#!" class="heart" onclick="addFavo('v', 0);">
+                                    <div class="favo secondary-content valign-wrapper">
+                                        <div>121</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col s1 m1">
+                            </div>
+                            <div class="col s1 m1">
+                                <a class="btn-floating btn-small"><i class="material-icons">clear</i></a>
+                            </div>
+                        </div>
+                        </li>
+                    <li class="collection-item">
+                        <div>Alvin
+                            <a href="#!" class="secondary-content"><i class="material-icons">send</i></a>
+                            <a href="#!" class="secondary-content"><i class="material-icons">clear</i></a></div>
+                    </li>
+                    
+                </ul>
+            </div>
+            <div class="row">
+                <ul class="collection">
+                    <li class="collection-header">
+                        <div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div>
+                    </li>
+                    <li class="collection-item">
+                        <div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div>
+                    </li>
+                </ul>
             </div>
             <div class="row">
                 <ul id="records" class="collapsible" data-collapsible="expandable">
@@ -143,6 +249,68 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
         </div>
     </div>
+
+
+
+    <template id="tmpl-playroom">
+        <div class="musicinfo row valign-wrapper nomargin">
+            <div class="col s12 center">
+                <h5>
+                    課題曲: ${title}
+                </h5>
+            </div>
+        </div>
+        {{each(key, instrument) instruments}}
+        <div class="row instrument">
+            <ul class="collection with-header">
+                <li class="collection-header"> 
+                    {{if firebase.auth().currentUser}}
+                    <a class="${key}_track_add secondary-content btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">add</i></a>
+                    {{/if}}
+                    <h5><img src="${instrument.partIcon}" width="24" height="24" class="insticon">${instrument.partName}  ${key}</h5>
+                </li>
+            </ul>
+        </div>
+        {{/each}}
+    </template>
+
+    <template id="tmpl-playroom-track">
+        <li class="collection-item track${id}">
+            {{if track.player == firebase.auth().currentUser.uid}}
+            <a class="track_rec secondary-content"><i class="material-icons red-text">mic</i></a>
+            <a class="track_clear secondary-content"><i class="material-icons">clear</i></a>
+            {{/if}}
+            <div class="row valign-wrapper">
+                <div class="col s1">
+                    <webaudio-switch id="track${id}_toggle" src="/lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
+                </div>
+                <div class="col s1">
+                    <webaudio-knob id="track${id}_vol" src="/lib/webaudio-controls/img/LittlePhatty.png" sprites="100" diameter="32" min="0"
+                        max="200" value="100"></webaudio-knob>
+                </div>
+                <div class="col s1">
+                    <canvas id="track${id}_vol_indi" width="10" height="40"></canvas>
+                </div>
+                <div class="col s2 m1">
+                    <img src="{player.photoURL}" alt="${player.displayName}" class="circle responsive-img">
+                </div>
+                <div class="name col s4">
+                    ${player.displayName}
+                </div>
+                <div class="col s3">
+                    ${player.level}
+                </div>
+                <div class="col s1 m2">
+                    <a href="#!" class="heart" onclick="addFavo('${partId}', ${i});">
+                        <div class="favo secondary-content valign-wrapper">
+                            <div>${track.likes}</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            </li>
+    </template>
+
 
     <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
     <script>
@@ -242,13 +410,13 @@
             window.app.start();
             $("#template").tmpl(data).appendTo("#records")
             $('.collapsible').collapsible();
-            const mixer = window.app.mixer;
-            for (let i = 0; i < data.length; i++) {
-                for (let j = 0; j < data[i].records.length; j++) {
-                    const trackId = data[i].partId + j.toString();
-                    mixer.loadAudioBuffer(trackId, trackId);
-                }
-            }
+            // const mixer = window.app.mixer;
+            // for (let i = 0; i < data.length; i++) {
+            //     for (let j = 0; j < data[i].records.length; j++) {
+            //         const trackId = data[i].partId + j.toString();
+            //         mixer.loadAudioBuffer(trackId, trackId);
+            //     }
+            // }
         });
 
         /**

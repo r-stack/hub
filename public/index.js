@@ -21,6 +21,8 @@ if (!window.AudioContext){
 class App{
     constructor(){
         this.handlers = [];
+        this.$page = {};
+        this.$current = null;
 
         if (typeof window !== 'undefined') {
             this.location = window.location;
@@ -58,6 +60,13 @@ class App{
         this.handlers.push({route:pattern, callback:callback});
     }
 
+    showPage(name, options){
+        if(this.$current) this.$current.hide();
+        this.$current = this.$page[name];
+        this.$current.show();
+        return this.$current;
+    }
+
     __checkUrl(){
         console.log("__checkUrl");
     }
@@ -72,6 +81,12 @@ class HubApp extends App{
         //LCD
         //init LCD
         this.lcd = new CanvasLCD('06');
+        this.lcd.init('mixer_lcd', "SPACE", false);
+
+        //init pages
+        this.$page["home"] = this.$el.find("#page01_home").hide();
+        this.$page["listrooms"] = this.$el.find("#page02_listrooms").hide();
+        this.$page["playroom"] = this.$el.find("#page03_playroom").hide();
 
         //init mixer
         this.mixer = new Mixer(this);
@@ -105,22 +120,35 @@ class HubApp extends App{
         console.log("home");
         // init application message
         this.lcd.init('mixer_lcd', "LET'S PLAY.", true);
+
+        //show home page
+        this.showPage("home");
     }
     listrooms(){
         console.log("PAGE: PLAYROOM LIST", arguments);
+        //show listrooms page
+        this.showPage("listrooms");
     }
     playroom(path, id){
+        let self = this;
         console.log("PAGE: PLAYROOM DETAIL", arguments);
         console.log(this);
-        //TODO: hide other view
+        this.lcd.write2Display("lettersRL01", "LOADING.....");
         firebase.database().ref(path).once("value", snap=>{
             let playroom = snap.val();
-            //TODO: create mixer;
+            //show playroom page
+            self.mixer.load(playroom);
             //TODO: render playrooms( title, tempo, instruments)
             //TODO: activate
             firebase.database().ref("/tracks/" + id).on("value", snap_tracks=>{
                 console.log("value: /tracks/" + id);
                 let tracks = snap_tracks.val();
+                console.log(tracks);
+
+
+
+                self.showPage("playroom");
+                this.lcd.write2Display("letters", playroom.title);
             });
         })
     }
@@ -229,7 +257,6 @@ class Mixer {
 
         //init LCD
         this.lcd = this.app.lcd;
-        this.lcd.init('mixer_lcd', this.musicTitle, false);
 
         //dom event
         $("#main_vol").on("change", (e) => {
@@ -264,6 +291,27 @@ class Mixer {
     get playing() {
         return this._playing;
     }
+
+    /**
+     * 既存のロード済みトラックを破棄して新しくPlayroomを構築します。
+     */
+    load(playroom){
+        this.playroom = playroom;
+        this.musicTitle = playroom.title;
+
+        this.$el = $("#page03_playroom");
+        //clear playroom page content
+        this.$el.empty();
+        //render music info and instruments
+        $("#tmpl-playroom").tmpl(this.playroom).appendTo(this.$el);
+
+        //load tracks
+
+        //complete
+
+
+    }
+
     play(startTime) {
         if (this.playing) return;
         var _startTime = startTime;
@@ -343,7 +391,7 @@ class Mixer {
     }
     loadAudioBuffer(id, target) {
         var self = this;
-        var url = '/sound/' + target + '.mp3';
+        var url = target;
         console.log(url);
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
