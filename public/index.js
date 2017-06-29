@@ -130,27 +130,10 @@ class HubApp extends App{
         this.showPage("listrooms");
     }
     playroom(path, id){
-        let self = this;
+        var self = this;
         console.log("PAGE: PLAYROOM DETAIL", arguments);
         console.log(this);
-        this.lcd.write2Display("lettersRL01", "LOADING.....");
-        firebase.database().ref(path).once("value", snap=>{
-            let playroom = snap.val();
-            //show playroom page
-            self.mixer.load(playroom);
-            //TODO: render playrooms( title, tempo, instruments)
-            //TODO: activate
-            firebase.database().ref("/tracks/" + id).on("value", snap_tracks=>{
-                console.log("value: /tracks/" + id);
-                let tracks = snap_tracks.val();
-                console.log(tracks);
-
-
-
-                self.showPage("playroom");
-                this.lcd.write2Display("letters", playroom.title);
-            });
-        })
+        this.mixer.load(id).done(()=>self.showPage('playroom'));
     }
 
 }
@@ -241,6 +224,7 @@ class AuthView {
  */
 class Mixer {
     constructor(app) {
+        this.$el = $("#page03_playroom");
         this.app = app || window.app;
         this.musicTitle = "MARCH OF KOALA";
         this.tracks = [];
@@ -258,7 +242,7 @@ class Mixer {
         //init LCD
         this.lcd = this.app.lcd;
 
-        //dom event
+        //dom event for global nav
         $("#main_vol").on("change", (e) => {
             var v = e.target.value;
             self.gainNode.gain.value = v / 100;
@@ -276,6 +260,13 @@ class Mixer {
             self.rec();
         });
 
+        //dom event for instrument
+        this.$el.on("click", ".track_add", function(evt){
+            console.log("track_add", evt.currentTarget);
+            self.createNewTrack($(evt.currentTarget).attr("data-instrument"));
+        });
+        //firebase event
+        firebase.auth().onAuthStateChanged(this.update.bind(this));
     }
     get offset() {
         if (this.playing) {
@@ -292,24 +283,49 @@ class Mixer {
         return this._playing;
     }
 
-    /**
+    /*r
      * 既存のロード済みトラックを破棄して新しくPlayroomを構築します。
      */
-    load(playroom){
-        this.playroom = playroom;
-        this.musicTitle = playroom.title;
+    load(playroomId){
+        const id = playroomId;
+        const d = $.Deferred();
+        let self = this;
+        this.lcd.write2Display("lettersRL01", "LOADING.....");
+        firebase.database().ref("/playrooms/"+id).once("value", snap=>{
+            let playroom = snap.val();
+            //show playroom page
+            this.playroomId = id;
+            this.playroom = playroom;
+            this.musicTitle = playroom.title;
 
-        this.$el = $("#page03_playroom");
-        //clear playroom page content
-        this.$el.empty();
-        //render music info and instruments
-        $("#tmpl-playroom").tmpl(this.playroom).appendTo(this.$el);
+            //clear playroom page content
+            this.$el.empty();
+            //render music info and instruments
+            $("#tmpl-playroom").tmpl(this.playroom).appendTo(this.$el);
+            //TODO: activate
+            firebase.database().ref("/tracks/" + id).once("value", snap_tracks=>{
+                console.log("value: /tracks/" + id);
+                let tracks = self._tracks = snap_tracks.val();
+                console.log(tracks);
+                for(let key in tracks){
+                    self.loadAudioBuffer(key, tracks[key]);
+                }
 
-        //load tracks
 
-        //complete
+                self.lcd.write2Display("letters", playroom.title);
+                d.resolve();
+            });
+        });
+        return d;
+    }
 
-
+    update(){
+        console.log("Mixer.update()");
+        if(firebase.auth().currentUser){
+            this.$el.find(".track_add").show();
+        }else{
+            this.$el.find(".track_add").hide();
+        }
     }
 
     play(startTime) {
@@ -380,19 +396,47 @@ class Mixer {
             window.cancelAnimationFrame(this._lcd_rafId)
         }
     }
-    addTrack(id, buf) {
+
+
+    createNewTrack(instrument){
+        let user = firebase.auth().currentUser;
+        let trackInfo = {
+            "instrument": instrument,
+            "likes":0,
+            "player": user.uid,
+        }
+        const ref = firebase.database().ref("/tracks/" + this.playroomId);
+        const tkey = ref.push().key;
+        console.log("tkey", tkey, trackInfo);
+        ref.child(tkey).set(trackInfo);
+        this.loadAudioBuffer(tkey, trackInfo);
+    }
+    
+    addTrack(id, trackInfo, buf) {
         if (id === undefined) {
             id = this.tracks.length;
         }
-        var track = new Track(id, this, buf);
-        track.output.connect(this.gainNode);
-        this.tracks.push(track);
-        return track;
+        const container = this.$el.find(".instrument[data-instrument="+trackInfo.instrument+"] .with-header");
+        if(container.length){
+            var track = new Track(id, this, buf, trackInfo, container);
+            track.output.connect(this.gainNode);
+            this.tracks.push(track);
+            return track;
+        }else{
+            return undefined;
+        }
     }
-    loadAudioBuffer(id, target) {
+    loadAudioBuffer(id, trackInfo) {
+        var target = trackInfo.sound;
         var self = this;
         var url = target;
         console.log(url);
+        if(!url){
+            //まだからのSound
+            let buf = this.context.createBuffer(2, 1, this.context.sampleRate);
+            this.addTrack(id, trackInfo, buf);
+            return; 
+        }
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
@@ -406,7 +450,7 @@ class Mixer {
             if (this.status === 200) {
                 self.context.decodeAudioData(request.response, function (buf) {
                     //                buffer = buf;
-                    d.resolve(self.addTrack(id, buf));
+                    d.resolve(self.addTrack(id, trackInfo, buf));
                 });
             }
         };
@@ -416,7 +460,7 @@ class Mixer {
 }
 
 class Track {
-    constructor(id, mixer, buffer) {
+    constructor(id, mixer, buffer, trackInfo, container) {
         var self = this;
         this.id = id;
         this.mixer = mixer;
@@ -425,6 +469,13 @@ class Track {
         var gainNode = this.gainNode = context.createGain();
 
         this.enabled = false;
+        console.log(container);
+        container.append($("#tmpl-playroom-track")
+            .tmpl({
+                "id": id,
+                "track":trackInfo,
+                "player":{}
+            }).addClass(".track" + id));
 
         this.$el = $(".track" + id);
         this.elToggle = document.getElementById("track" + id + "_toggle");

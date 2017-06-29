@@ -261,11 +261,11 @@
             </div>
         </div>
         {{each(key, instrument) instruments}}
-        <div class="row instrument">
+        <div data-instrument="${key}" class="row instrument">
             <ul class="collection with-header">
                 <li class="collection-header"> 
                     {{if firebase.auth().currentUser}}
-                    <a class="${key}_track_add secondary-content btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">add</i></a>
+                    <a data-instrument="${key}" class="track_add secondary-content btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">add</i></a>
                     {{/if}}
                     <h5><img src="${instrument.partIcon}" width="24" height="24" class="insticon">${instrument.partName}  ${key}</h5>
                 </li>
