@@ -48,14 +48,9 @@
                         </div>
                     </li>
                     <li>
-                        <div class="main_auth">
+                        <div class="main_auth col s3">
                             <a id="main_signin" class="waves-effect waves-light btn-large"><i class="material-icons right">person</i>Sign in</a>
                             <img id="username" height="40" style="margin-top:12px;padding:0 5px"/>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="">
-                            <a id="main_rec" class="modal-trigger btn-floating btn-small waves-effect waves-light red"><i class="material-icons">settings_voice</i></a>
                         </div>
                     </li>
                 </ul>
@@ -65,9 +60,9 @@
     <main style="clear:both">
         <div id="page01_home" class="container">
         </div>
-        <div id="page02_listrooms" class="container">
+        <div id="page02_listrooms" class="container" style="display:none">
         </div>
-        <div id="page03_playroom" class="container">
+        <div id="page03_playroom" class="container" style="display:none">
             <div class="musicinfo row valign-wrapper nomargin">
                 <div class="col s12 center">
                     <h5>
@@ -276,11 +271,7 @@
 
     <template id="tmpl-playroom-track">
         <li class="collection-item track${id}">
-            {{if track.player == firebase.auth().currentUser.uid}}
-            <a class="track_rec secondary-content"><i class="material-icons red-text">mic</i></a>
-            <a class="track_clear secondary-content"><i class="material-icons">clear</i></a>
-            {{/if}}
-            <div class="row valign-wrapper">
+            <div class="valign-wrapper">
                 <div class="col s1">
                     <webaudio-switch id="track${id}_toggle" src="/lib/webaudio-controls/img/switch_toggle.png" width="52" height="52"></webaudio-switch>
                 </div>
@@ -292,20 +283,25 @@
                     <canvas id="track${id}_vol_indi" width="10" height="40"></canvas>
                 </div>
                 <div class="col s2 m1">
-                    <img src="{player.photoURL}" alt="${player.displayName}" class="circle responsive-img">
+                    <img src="${player.photoURL}" alt="${player.displayName}" class="circle responsive-img">
                 </div>
-                <div class="name col s4">
+                <div class="name col s3">
                     ${player.displayName}
                 </div>
-                <div class="col s3">
+                <div class="col s2">
                     ${player.level}
                 </div>
                 <div class="col s1 m2">
-                    <a href="#!" class="heart" onclick="addFavo('${partId}', ${i});">
+                    <a href="#!" class="heart">
                         <div class="favo secondary-content valign-wrapper">
                             <div>${track.likes}</div>
                         </div>
                     </a>
+                </div>
+                <div class="col s1">
+                    {{if track.player == firebase.auth().currentUser.uid}}
+                    <a class="track_rec btn-flat"><i class="material-icons red-text">mic</i></a>
+                    <a class="track_remove btn-flat"><i class="material-icons">clear</i></a> {{/if}}
                 </div>
             </div>
             </li>
@@ -419,21 +415,7 @@
             // }
         });
 
-        /**
-        * イベントハンドル関数
-        */
 
-        // いいねのカウントアップ
-        function addFavo(partId, sequence) {
-            const favo = parseInt($('#' + partId + sequence + ' div.favo div').text());
-            $('#' + partId + sequence + ' div.favo div').text(favo + 1);
-        }
-
-        function addFavo(partId, sequence) {
-            console.log('#' + partId + sequence + ' div.favo div');
-            const favo = parseInt($('#' + partId + sequence + ' div.favo div').text());
-            $('#' + partId + sequence + ' div.favo div').text(favo + 1);
-        }
     </script>
 </body>
 
