@@ -262,7 +262,7 @@
                     {{if firebase.auth().currentUser}}
                     <a data-instrument="${key}" class="track_add secondary-content btn-floating btn-small waves-effect waves-light teal"><i class="material-icons">add</i></a>
                     {{/if}}
-                    <h5><img src="${instrument.partIcon}" width="24" height="24" class="insticon">${instrument.partName}  ${key}</h5>
+                    <h5><img src="${instrument.partIcon}" width="24" height="24" class="insticon">${instrument.partName}</h5>
                 </li>
             </ul>
         </div>
@@ -282,19 +282,19 @@
                 <div class="col s1">
                     <canvas id="track${id}_vol_indi" width="10" height="40"></canvas>
                 </div>
-                <div class="col s2 m1">
+                <div class="photoURL col s2 m1">
                     <img src="${player.photoURL}" alt="${player.displayName}" class="circle responsive-img">
                 </div>
-                <div class="name col s3">
+                <div class="displayName col s3">
                     ${player.displayName}
                 </div>
-                <div class="col s2">
+                <div class="level col s2">
                     ${player.level}
                 </div>
                 <div class="col s1 m2">
                     <a href="#!" class="heart">
                         <div class="favo secondary-content valign-wrapper">
-                            <div>${track.likes}</div>
+                            <div>0</div>
                         </div>
                     </a>
                 </div>
