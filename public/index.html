@@ -299,9 +299,9 @@
                     </a>
                 </div>
                 <div class="col s1">
-                    {{if track.player == firebase.auth().currentUser.uid}}
+                    {{if firebase.auth().currentUser}}{{if track.player == firebase.auth().currentUser.uid }}
                     <a class="track_rec btn-flat"><i class="material-icons red-text">mic</i></a>
-                    <a class="track_remove btn-flat"><i class="material-icons">clear</i></a> {{/if}}
+                    <a class="track_remove btn-flat"><i class="material-icons">clear</i></a> {{/if}}{{/if}}
                 </div>
             </div>
             </li>
