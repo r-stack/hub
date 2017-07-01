@@ -1,122 +1,233 @@
 
 
-//var SOUND_URL = '/sound/n127.mp3';
-//var SOUND_URL2 = '/sound/Moonlight.mp3';
+// Media API
+if (!navigator.getUserMedia)
+    navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+if (!navigator.cancelAnimationFrame)
+    navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+if (!navigator.requestAnimationFrame)
+    navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
 
-var SupportedAudioContext;
-try {
-    SupportedAudioContext = window.AudioContext || window.webkitAudioContext;
-} catch (e) {
-    throw new Error('Web Audio API is not supported.');
+
+if (!window.AudioContext){
+    window.AudioContext = window.webkitAudioContext;
 }
-var context;
 
+/**
+ * Applicationのベースクラス
+ * 機能
+ * - pushStateによるSPA画面遷移
+ */
+class App{
+    constructor(){
+        this.handlers = [];
+        this.$page = {};
+        this.$current = null;
 
-var source;
-var ctrls;
-
-function play(targets) {
-    if (!targets || targets.length === 0) {
-        return;
+        if (typeof window !== 'undefined') {
+            this.location = window.location;
+            this.history = window.history;
+        }
     }
-    if (!context) {
-        context = new SupportedAudioContext();
+    start(){
+        //popstate
+        window.addEventListener("popstate", this.__checkUrl, false); 
+        this.loadUrl(this.location.pathname);
     }
 
-    ctrls = new Array();
+    stop(){
+        window.removeEventListener("popstate", this.__checkUrl, false)
+    }
 
-    var dffs = new Array();
-
-    $.each(targets, function (i, target) {
-
-        var url = '/sound/' + target + '.mp3';
-
-
-        var request = new XMLHttpRequest();
-        request.open('GET', url, true);
-        request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
-        request.send();
-
-
-        var d = new $.Deferred;
-        request.onload = function () {
-            // contextにArrayBufferを渡し、decodeさせる
-            context.decodeAudioData(request.response, function (buf) {
-                //                buffer = buf;
-                ctrls.push(createSource(buf));
-                d.resolve();
-            });
-        };
-
-        dffs.push(d);
-    });
-
-
-    $.when.apply($, dffs).then(function () {
-
-        $.each(ctrls, function (i, ctrl) {
-
-            ctrl.source.connect(context.destination);
-            ctrl.source.start(0);
+    navigate(fragment, options){
+        if(options.replace){
+            this.history.replaceState({}, document.title, fragment);
+        }else{
+            this.history.pushState({}, document.title, fragment);
+        }
+        this.loadUrl(fragment);
+    }
+    loadUrl(fragment){
+        this.handlers.some(handle=>{
+            if(handle.route.test(fragment)){
+                handle.callback.apply(this, fragment.match(handle.route));
+                return true;
+            }
         });
-    });
+    }
+
+    route(pattern, callback){
+        this.handlers.push({route:pattern, callback:callback});
+    }
+
+    showPage(name, options){
+        if(this.$current) this.$current.hide();
+        this.$current = this.$page[name];
+        this.$current.show();
+        return this.$current;
+    }
+
+    __checkUrl(){
+        console.log("__checkUrl");
+    }
+}
+class HubApp extends App{
+
+    constructor(){
+        super();
+        this.$el = $("main");
+        //AuthView
+        this.auth = new AuthView();
+        //LCD
+        //init LCD
+        this.lcd = new CanvasLCD('06');
+        this.lcd.init('mixer_lcd', "SPACE", false);
+
+        //init pages
+        this.$page["home"] = this.$el.find("#page01_home").hide();
+        this.$page["listrooms"] = this.$el.find("#page02_listrooms").hide();
+        this.$page["playroom"] = this.$el.find("#page03_playroom").hide();
+
+        //init mixer
+        this.mixer = new Mixer(this);
+
+        this.init();
+        this.render();
+    }
+
+    init(){
+        //initialize router settings
+        this.route(/^$/, this.home);
+        this.route(/^\/playrooms\/$/, this.listrooms);
+        this.route(/^\/playrooms\/(\S+)$/, this.playroom);
+
+    }
+
+    /**
+     * rendering global level components.
+     * - auth
+     * - lcd
+     * - menu
+     */
+    render(){
+
+        this.auth.render();
+        return this;        
+    }
 
 
+    home(){
+        console.log("home");
+        // init application message
+        this.lcd.init('mixer_lcd', "LET'S PLAY.", true);
 
-};
+        //show home page
+        this.showPage("home");
+    }
+    listrooms(){
+        console.log("PAGE: PLAYROOM LIST", arguments);
+        //show listrooms page
+        this.showPage("listrooms");
+    }
+    playroom(path, id){
+        var self = this;
+        console.log("PAGE: PLAYROOM DETAIL", arguments);
+        console.log(this);
+        this.mixer.load(id).done(()=>self.showPage('playroom'));
+    }
 
-
-function createSource(buffer) {
-    var source = context.createBufferSource();
-    var gainNode = context.createGain ? context.createGain() : context.createGainNode();
-    source.buffer = buffer;
-    // Turn on looping
-    source.loop = true;
-    // Connect source to gain.
-    source.connect(gainNode);
-    // Connect gain to destination.
-    gainNode.connect(context.destination);
-
-    return {
-        source: source,
-        gainNode: gainNode
-    };
 }
 
-function stop() {
-    $.each(ctrls, function (i, ctrl) {
-        ctrl.source.stop();
-    });
-}
+class AuthView {
+    constructor() {
+        this.$el = $(".main_auth");
+        this.auth = firebase.auth();
+        console.log(this.auth);
+        this.init();
+    }
 
+    init(){
+        var self = this;
 
-function rec(category) {
-    console.log("rec")
-}
+        this.$el.on("click", "#main_signin", function(){
+            console.log("start login process");
+            self.login();
+        });
+        this.$el.on("click", "#username", function(){
+            console.log("start logout process");
+            self.logout();
+        });
 
+        this.auth.onAuthStateChanged(function (user) {
+            self.user = user;
+            self.update();
+            if (user) {
+                console.log("User is signed in.");
+            } else {
+                console.log("No user is signed in.");
+            }
+        });
+        return this;
+    }
+    
+    render(){
+        this.update();
+        return this;
+    }
+    update(){
+        if(this.auth.currentUser){
+            this.$el.find("#main_signin").hide();
+            this.$el.find("#username").attr("src", this.auth.currentUser.photoURL).show();
+        }else{
+            this.$el.find("#main_signin").show();
+            this.$el.find("#username").attr("src", "").hide();
+        }
+        return this
+    }
+    login() {
+        var self = this;
+        var provider = new firebase.auth.GithubAuthProvider();
+        firebase.auth().signInWithPopup(provider).then(function (result) {
+            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+            var token = result.credential.accessToken;
+            // The signed-in user info.
+            var user = result.user;
+            self.user = user;
+        }).catch(function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // The email of the user's account used.
+            var email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            var credential = error.credential;
+            alert("Login Failed.");
+        });
+    }
+    logout(){
+        this.auth.signOut().then(function () {
+            console.log('Sign-out successful.');
+            
+        }, function (error) {
+            console.log('Sign-out with An error happened');
+        });
+    }
 
-
-
-function test01() {
-    t1_indi = new VolumeIndicator(ctrls[0].source, document.getEementById("t1_indi"));
-    t1_indi.start();
-}
-function test02() {
-    var m = window.m = new Mixer();
-    m.loadAudioBuffer("0", "v1");
-    m.loadAudioBuffer("1", "g1");
-    window.r = new RecordDeck(m);
-    window.metro = new Metronome(m);
 }
 
 
 //---------------------------------------------
 // Mixer
 //
+/**
+ * Mixer
+ */
 class Mixer {
-    constructor() {
+    constructor(app) {
+        this.$el = $("#page03_playroom");
+        this.app = app || window.app;
         this.musicTitle = "MARCH OF KOALA";
-        this.tracks = [];
+        this.tracks = {};
         this.context = new window.AudioContext();
         this.gainNode = this.context.createGain();
         this.gainNode.connect(this.context.destination);
@@ -129,26 +240,30 @@ class Mixer {
         this.recorddeck = new RecordDeck(this);
 
         //init LCD
-        this.lcd = new CanvasLCD('06');
-        this.lcd.init('mixer_lcd', this.musicTitle, true);
+        this.lcd = this.app.lcd;
 
-        //dom event
+        //dom event for global nav
         $("#main_vol").on("change", (e) => {
             var v = e.target.value;
             self.gainNode.gain.value = v / 100;
         });
-        $("#main_play").on("click", (e) => {
+        this.$btnPlay = $("#main_play").on("click", (e) => {
             self.play();
         });
-        $("#main_pause").on("click", (e) => {
+        this.$btnPause = $("#main_pause").on("click", (e) => {
             self.pause();
-        });
-        $("#main_stop").on("click", (e) => {
+        }).hide();
+        this.$btnStop = $("#main_stop").on("click", (e) => {
             self.stop();
+        }).addClass("disabled");
+
+        //dom event for instrument
+        this.$el.on("click", ".track_add", function(evt){
+            console.log("track_add", evt.currentTarget);
+            self.createNewTrack($(evt.currentTarget).attr("data-instrument"));
         });
-        $("#main_rec").on("click", (e) => {
-            self.rec();
-        });
+        //firebase event
+        firebase.auth().onAuthStateChanged(this.update.bind(this));
     }
     get offset() {
         if (this.playing) {
@@ -164,6 +279,52 @@ class Mixer {
     get playing() {
         return this._playing;
     }
+
+    /*r
+     * 既存のロード済みトラックを破棄して新しくPlayroomを構築します。
+     */
+    load(playroomId){
+        const id = playroomId;
+        const d = $.Deferred();
+        let self = this;
+        this.lcd.write2Display("lettersRL01", "LOADING.....");
+        firebase.database().ref("/playrooms/"+id).once("value", snap=>{
+            let playroom = snap.val();
+            //show playroom page
+            this.playroomId = id;
+            this.playroom = playroom;
+            this.musicTitle = playroom.title;
+
+            //clear playroom page content
+            this.$el.empty();
+            //render music info and instruments
+            $("#tmpl-playroom").tmpl(this.playroom).appendTo(this.$el);
+            //TODO: activate
+            firebase.database().ref("/tracks/" + id).once("value", snap_tracks=>{
+                console.log("value: /tracks/" + id);
+                let tracks = self._tracks = snap_tracks.val();
+                console.log(tracks);
+                for(let key in tracks){
+                    self.loadAudioBuffer(key, tracks[key]);
+                }
+
+
+                self.lcd.write2Display("letters", playroom.title);
+                d.resolve();
+            });
+        });
+        return d;
+    }
+
+    update(){
+        console.log("Mixer.update()");
+        if(firebase.auth().currentUser){
+            this.$el.find(".track_add").show();
+        }else{
+            this.$el.find(".track_add").hide();
+        }
+    }
+
     play(startTime) {
         if (this.playing) return;
         var _startTime = startTime;
@@ -171,29 +332,60 @@ class Mixer {
             _startTime = this.context.currentTime + 1;
         }
         var offsetTime = this._offsetTime;
-        this.tracks.forEach((track) => track.start(_startTime, offsetTime));
+        $.each(this.tracks, (key, track) => track.start(_startTime, offsetTime));
         this._startTime = _startTime;
         this._playing = true;
         this._startLCD();
+
+        this.$btnPlay.hide();
+        this.$btnPause.show();
+        this.$btnStop.removeClass("disabled");
     }
     pause() {
-        this.tracks.forEach((track) => track.stop());
+        $.each(this.tracks, (key, track) => track.stop());
         this._offsetTime = this.offset;
         this._playing = false;
         this._stopLCD();
+        
+        this.$btnPlay.show();
+        this.$btnPause.hide();
+        this.$btnStop.addClass("disabled");
     }
     stop() {
-        this.tracks.forEach((track) => track.stop());
+        $.each(this.tracks, (key, track) => track.stop());
         this._offsetTime = 0;
         this._playing = false;
         this._drawLCD();
         this._stopLCD();
+        
+        this.$btnPlay.show();
+        this.$btnPause.hide();
+        this.$btnStop.addClass("disabled");
     }
-    rec() {
+    rec(track_id) {
         var self = this;
         if (this.playing) return;
         this._offsetTime = 0;
+        this.recording_track = track_id;
         this.recorddeck.open();
+        
+        this.$btnPlay.hide();
+        this.$btnPause.show();
+        this.$btnStop.removeClass("disabled");
+    }
+    /**
+     * レコーディング完了時にコールバックされる 
+     * @param {AudioBuffer} buffer 
+     * @param {Blob} WAV形式のBLOB 
+     */
+    completeRecording(buffer, wavBlob){
+        if(this.recording_track){
+            let track = this.tracks[this.recording_track];
+            track.saveSound(buffer, wavBlob);
+        }
+    }
+    cancelRecording(){
+        delete this.recording_track;
     }
 
     _startLCD() {
@@ -216,19 +408,49 @@ class Mixer {
             window.cancelAnimationFrame(this._lcd_rafId)
         }
     }
-    addTrack(id, buf) {
-        if (id === undefined) {
-            id = this.tracks.length;
-        }
-        var track = new Track(id, this, buf);
-        track.output.connect(this.gainNode);
-        this.tracks.push(track);
-        return track;
-    }
-    loadAudioBuffer(id, target) {
-        var self = this;
-        var url = '/sound/' + target + '.mp3';
 
+
+    createNewTrack(instrument){
+        let user = firebase.auth().currentUser;
+        let trackInfo = {
+            "instrument": instrument,
+            "likes":0,
+            "player": user.uid,
+        }
+        const ref = firebase.database().ref("/tracks/" + this.playroomId);
+        const tkey = ref.push().key;
+        console.log("tkey", tkey, trackInfo);
+        ref.child(tkey).set(trackInfo);
+        this.loadAudioBuffer(tkey, trackInfo);
+    }
+    
+    addTrack(id, trackInfo, buf) {
+        const container = this.$el.find(".instrument[data-instrument="+trackInfo.instrument+"] .with-header");
+        if(container.length){
+            var track = new Track(id, this, buf, trackInfo, container);
+            track.output.connect(this.gainNode);
+            this.tracks[id] = track;
+            return track;
+        }else{
+            return undefined;
+        }
+    }
+    removeTrack(id){
+        const track = this.tracks[id];
+        track.remove();
+        delete this.tracks[id];
+    }
+    loadAudioBuffer(id, trackInfo) {
+        var target = trackInfo.sound;
+        var self = this;
+        var url = target;
+        console.log(url);
+        if(!url){
+            //まだからのSound
+            let buf = this.context.createBuffer(2, 1, this.context.sampleRate);
+            this.addTrack(id, trackInfo, buf);
+            return; 
+        }
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
@@ -242,7 +464,7 @@ class Mixer {
             if (this.status === 200) {
                 self.context.decodeAudioData(request.response, function (buf) {
                     //                buffer = buf;
-                    d.resolve(self.addTrack(id, buf));
+                    d.resolve(self.addTrack(id, trackInfo, buf));
                 });
             }
         };
@@ -252,15 +474,24 @@ class Mixer {
 }
 
 class Track {
-    constructor(id, mixer, buffer) {
+    constructor(id, mixer, buffer, trackInfo, container) {
         var self = this;
         this.id = id;
+        this.trackInfo = trackInfo;
+        this.trackRef = firebase.database().ref("/tracks/" + mixer.playroomId + "/" + id);
         this.mixer = mixer;
         var context = this.context = mixer.context;
         this.buffer = buffer;
         var gainNode = this.gainNode = context.createGain();
 
         this.enabled = false;
+        console.log(container);
+        container.append($("#tmpl-playroom-track")
+            .tmpl({
+                "id": id,
+                "track":trackInfo,
+                "player":{}
+            }));
 
         this.$el = $(".track" + id);
         this.elToggle = document.getElementById("track" + id + "_toggle");
@@ -286,12 +517,19 @@ class Track {
         this.volumeDb.start();
 
         this.$heart = this.$el.find(".heart");
-        this.$heart.on("click", (e) => {
-            console.log("cloned!!!!!");
-            var cloneTrack = self.mixer.addTrack(undefined, self.buffer);
-            cloneTrack.$el.find(".name").innerText = self.$el.find(".name").innerText;
-        });
+        this.$heart.on("click", this.increment.bind(this));
 
+        this.$rec = this.$el.find(".track_rec");
+        this.$rec.on("click", this.recHandler.bind(this));
+
+        this.$remove = this.$el.find(".track_remove");
+        this.$remove.on("click", this.removeHandler.bind(this));
+
+
+        //firebase event
+        this.trackRef.child("likes").on("value", snapshot=>{
+            self.updateLikes(snapshot.val());
+        });
     }
     start(when, offset) {
         if (!this.enabled) return;
@@ -312,6 +550,79 @@ class Track {
     }
     get output() {
         return this.gainNode;
+    }
+
+
+
+    updateLikes(likes){
+        this.$heart.find("div.favo>div").text(likes);
+    }
+
+    /**
+     * このトラックのレコーディングを開始する。
+     */
+    recHandler(){
+        this.mixer.rec(this.id);
+    }
+
+    /**
+     * 
+     * @param {AudioBuffer} buffer 
+     * @param {Blob} wavblob 
+     */
+    saveSound(buffer, wavblob){
+        const self = this;
+        this.buffer = buffer;
+
+        var wavref = firebase.storage().ref("/tracks/" + this.id + ".wav");
+        wavref.put(wavblob).then(()=>{
+            console.log("sound save into storage");
+            wavref.getDownloadURL().then((url)=>{
+                if(self.trackInfo.sound != url){
+                    console.log("try update database for sound url");
+                    self.trackRef.child("sound").set(url).then(resolved=>{
+                        console.log("sound url saved. sound=%s", url);
+                    });
+                }
+            });
+        });
+
+    }
+
+    /**
+     * Trackの削除イベントリスナ
+     */
+    removeHandler(){
+        this.mixer.removeTrack(this.id);
+    }
+    /**
+     * Trackの削除
+     */
+    remove(){
+        this.$el.remove();
+        this.stop();
+        this.output.disconnect();
+        return this.trackRef.remove();
+    }
+
+    /**
+     * いいねのカウントアップ
+     */ 
+    increment() {
+        const self = this;
+        console.log("increment likes");
+        this.trackRef.child("likes").transaction(likes=>{
+            console.log("increment likes %o", likes);
+            if(likes != null){
+                likes++;
+            }
+            console.log(likes);
+            return likes;
+        }).then((resolved)=>{
+            console.log(resolved);
+            const likes = resolved.snapshot.val();
+            console.log("increment tx success likes = %o", likes); 
+        });
     }
 
 }
@@ -377,7 +688,11 @@ class RecordDeck {
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
         this.analyserContext = canvas.getContext('2d');
-        this.initAudio();
+        this.lazy = true;
+        this._audio_inited = false;
+        if(!this.lazy){
+            this.initAudio();
+        }
 
         this.$modal = $("#rec_modal").modal({
             ready: this.ready.bind(this),
@@ -401,22 +716,111 @@ class RecordDeck {
         this.audioRecorder.getBuffer((buf) => {
             console.log(buf);
             var trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
-            var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
-            console.log(ab);
-            for (var channel = 0; channel < 2; channel++) {
-                // 実際のデータの配列を得る
-                var nowBuffering = ab.getChannelData(channel);
-                for (var i = 0; i < nowBuffering.length; i++) {
-                    // Math.random()は[0; 1.0]である
-                    // 音声は[-1.0; 1.0]である必要がある
-                    nowBuffering[i] = buf[channel][trimIndex + i];
+            if (buf[0].length - trimIndex > 0) {
+                var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
+                console.log(ab);
+                for (var channel = 0; channel < 2; channel++) {
+                    // 実際のデータの配列を得る
+                    var nowBuffering = ab.getChannelData(channel);
+                    for (var i = 0; i < nowBuffering.length; i++) {
+                        // Math.random()は[0; 1.0]である
+                        // 音声は[-1.0; 1.0]である必要がある
+                        nowBuffering[i] = buf[channel][trimIndex + i];
+                    }
                 }
+                self.mixer.completeRecording(ab, self.encodeWAV(2, ab));
+                console.log(ab.length);
+            }else{
+                console.log("no rec data.");
             }
-            self.mixer.tracks[0].buffer = ab;
+            self.clearStream();
         });
     }
+
+
+    encodeWAV(numChannels, audiobuf) {
+
+        function interleave(inputL, inputR) {
+            var length = inputL.length + inputR.length;
+            var result = new Float32Array(length);
+
+            var index = 0,
+                inputIndex = 0;
+
+            while(index < length) {
+                result[index++] = inputL[inputIndex];
+                result[index++] = inputR[inputIndex];
+                inputIndex++;
+            }
+            return result;
+        }
+        function floatTo16BitPCM(output, offset, input) {
+            for(var i = 0; i < input.length; i++ , offset += 2) {
+                var s = Math.max(-1, Math.min(1, input[i]));
+                output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+        }
+
+        function writeString(view, offset, string) {
+            for(var i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        const sampleRate = this.audioContext.sampleRate;
+        let samples;
+        if(numChannels == 2){
+            samples = interleave(audiobuf.getChannelData(0), audiobuf.getChannelData(1));    
+        }else{
+            samples = audiobuf.getChannelData(0);
+        }
+        var buffer = new ArrayBuffer(44 + samples.length * 2);
+        var view = new DataView(buffer);
+
+        /* RIFF identifier */
+        writeString(view, 0, 'RIFF');
+        /* RIFF chunk length */
+        view.setUint32(4, 36 + samples.length * 2, true);
+        /* RIFF type */
+        writeString(view, 8, 'WAVE');
+        /* format chunk identifier */
+        writeString(view, 12, 'fmt ');
+        /* format chunk length */
+        view.setUint32(16, 16, true);
+        /* sample format (raw) */
+        view.setUint16(20, 1, true);
+        /* channel count */
+        view.setUint16(22, numChannels, true);
+        /* sample rate */
+        view.setUint32(24, sampleRate, true);
+        /* byte rate (sample rate * block align) */
+        view.setUint32(28, sampleRate * 4, true);
+        /* block align (channel count * bytes per sample) */
+        view.setUint16(32, numChannels * 2, true);
+        /* bits per sample */
+        view.setUint16(34, 16, true);
+        /* data chunk identifier */
+        writeString(view, 36, 'data');
+        /* data chunk length */
+        view.setUint32(40, samples.length * 2, true);
+
+        floatTo16BitPCM(view, 44, samples);
+
+        return new Blob([view], {type: "audio/wav"});
+    }
+
+    clearStream(){
+        if(this.stream){
+            this.stream.getTracks().forEach(tr=>tr.stop());
+            this._audio_inited = false;
+        }
+    }
     open() {
-        this.$modal.modal("open");
+        if (this._audio_inited) {
+            this.$modal.modal("open");
+        } else {
+            this.initAudio();
+        }
     }
     close() {
         this.$modal.modal("close");
@@ -434,7 +838,7 @@ class RecordDeck {
             if (data.beat === 0) {
                 measures += 1;
             }
-            if (measures === 1 && !self.mixer.playing) {
+            if (measures === 3 && !self.mixer.playing) {
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -454,8 +858,10 @@ class RecordDeck {
 
     }
     cancelAnalyserUpdates() {
-        window.cancelAnimationFrame(rafID);
-        this.rafID = null;
+        if(this.rafID){
+            window.cancelAnimationFrame(this.rafID);
+            this.rafID = null;
+        }
     }
 
     updateAnalysers(time) {
@@ -493,6 +899,7 @@ class RecordDeck {
 
 
     gotStream(stream) {
+        this.stream = stream;
         var inputPoint = this.audioContext.createGain();
 
         // Create an AudioNode from the stream.
@@ -512,16 +919,14 @@ class RecordDeck {
         inputPoint.connect(zeroGain);
         zeroGain.connect(this.audioContext.destination);
         this.updateAnalysers();
+
+        this._audio_inited = true;
+        if(this.lazy){
+            this.open();
+        }
     }
 
     initAudio() {
-        if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        if (!navigator.cancelAnimationFrame)
-            navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
-        if (!navigator.requestAnimationFrame)
-            navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
-
         navigator.getUserMedia(
             {
                 "audio": {
@@ -569,7 +974,7 @@ class Metronome {
         // and may or may not have played yet. {note, time}
         this.timerWorker = null;     // The Web Worker used to fire timer messages
 
-        this.timerWorker = new Worker("metronomeworker.js");
+        this.timerWorker = new Worker("/metronomeworker.js");
         var self = this;
         this.timerWorker.onmessage = function (e) {
             if (e.data == "tick") {
@@ -613,11 +1018,11 @@ class Metronome {
         this.needle.toggleClass("left-60deg");
         this.needle.toggleClass("right-60deg");
 
-        if ((-1 < throughoutCount && throughoutCount < 4)
-            || (4 < throughoutCount && throughoutCount < 12)
-            || (12 < throughoutCount && throughoutCount < 20)) {
-            return; // start with .x.x.xxxX
-        }
+        // if ((-1 < throughoutCount && throughoutCount < 4)
+        //     || (4 < throughoutCount && throughoutCount < 12)
+        //     || (12 < throughoutCount && throughoutCount < 20)) {
+        //     return; // start with .x.x.xxxX
+        // }
 
         // create an oscillator
         var osc = this.context.createOscillator();
