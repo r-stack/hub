@@ -381,6 +381,9 @@ class Mixer {
         // this._drawLCD();
         // this._stopLCD();
 
+        if(this.recording_track){
+            this.recorddeck.stop();
+        }
         
         this.$btnPlay.show();
         this.$btnPause.hide();
@@ -406,6 +409,7 @@ class Mixer {
         if(this.recording_track){
             let track = this.tracks[this.recording_track];
             track.saveSound(buffer, wavBlob);
+            delete this.recording_track;
         }
     }
     cancelRecording(){
@@ -755,7 +759,6 @@ class RecordDeck {
     }
     complete() {
         var self = this;
-        this.mixer.metronome.play();
         console.log("complete");
         this.mixer.stop();
         this.stop();
@@ -897,6 +900,7 @@ class RecordDeck {
     }
     stop() {
         this.audioRecorder.stop();
+        this.mixer.metronome.play();
     }
     resizeAnalyzer() {
         var canvas = document.getElementById("rec_analyser");
