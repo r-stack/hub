@@ -1,5 +1,7 @@
 language: node_js
-
+branches:
+  only:
+    - master
 deploy:
   provider: firebase
   token: "$FIREBASE_TOKEN"
