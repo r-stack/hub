@@ -1,5 +1,14 @@
-deploy:
-  provider: firebase
-  token: "$FIREBASE_TOKEN"
-  project: "rhd2017-hub"
+language: node_js
+
+node_js:
+  - "4.0"
+
+script:
+  - echo "Started to deploy into firebase."
+
+install:
+  - npm install -g firebase-tools
+
+after_success:
+  - firebase deploy --token $FIREBASE_TOKEN
 
