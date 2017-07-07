@@ -1,5 +1,10 @@
+language: node_js
+branches:
+  only:
+    - master
 deploy:
   provider: firebase
   token: "$FIREBASE_TOKEN"
-  project: "rhd2017-hub"
+  on:
+    all_branches: true
 
