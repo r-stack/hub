@@ -166,6 +166,7 @@ class AuthView {
             } else {
                 console.log("No user is signed in.");
             }
+            self.updateData();
         });
         return this;
     }
@@ -183,6 +184,27 @@ class AuthView {
             this.$el.find("#username").attr("src", "").hide();
         }
         return this
+    }
+
+    updateData(){
+        let user = this.user;
+        let ref = firebase.database().ref("/users/" + user.uid).transaction(current=>{
+            if(!current){
+                current = {
+                    level: 0
+                };
+            }
+            current.photoURL = user.photoURL;
+            current.displayName = user.displayName;
+            current.email = user.email;
+
+            if(user.email && !user.displayName){
+                current.displayName = user.email.replace(/@.+$/ ,"")
+            }
+            return current;
+        }).then(resolved=>{
+            console.log("/users/" + user.uid + " is saved", resolved.snapshot.val());
+        });
     }
     login() {
         var self = this;
@@ -294,6 +316,7 @@ class Mixer {
             this.playroomId = id;
             this.playroom = playroom;
             this.musicTitle = playroom.title;
+            this.metronome.tempo = playroom.tempo;
 
             //clear playroom page content
             this.$el.empty();
@@ -329,7 +352,7 @@ class Mixer {
         if (this.playing) return;
         var _startTime = startTime;
         if (_startTime === undefined) {
-            _startTime = this.context.currentTime + 1;
+            _startTime = this.context.currentTime + 0.1;
         }
         var offsetTime = this._offsetTime;
         $.each(this.tracks, (key, track) => track.start(_startTime, offsetTime));
@@ -355,8 +378,12 @@ class Mixer {
         $.each(this.tracks, (key, track) => track.stop());
         this._offsetTime = 0;
         this._playing = false;
-        this._drawLCD();
-        this._stopLCD();
+        // this._drawLCD();
+        // this._stopLCD();
+
+        if(this.recording_track){
+            this.recorddeck.stop();
+        }
         
         this.$btnPlay.show();
         this.$btnPause.hide();
@@ -382,6 +409,7 @@ class Mixer {
         if(this.recording_track){
             let track = this.tracks[this.recording_track];
             track.saveSound(buffer, wavBlob);
+            delete this.recording_track;
         }
     }
     cancelRecording(){
@@ -401,11 +429,19 @@ class Mixer {
             var dispoffset = fff.slice(this.musicTitle.length - 36 + 1);
             this.lcd.write2Display("letters", this.musicTitle + " " + dispoffset);
         }
-        this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
+        if(this.playroom){
+            if(offset>this.playroom.duration){
+                this.stop();
+            }
+        }
+        if(this.playing){
+            this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
+        }
     }
     _stopLCD() {
         if (this._lcd_rafId) {
             window.cancelAnimationFrame(this._lcd_rafId)
+            this._lcd_rafId = undefined;
         }
     }
 
@@ -414,7 +450,6 @@ class Mixer {
         let user = firebase.auth().currentUser;
         let trackInfo = {
             "instrument": instrument,
-            "likes":0,
             "player": user.uid,
         }
         const ref = firebase.database().ref("/tracks/" + this.playroomId);
@@ -479,6 +514,8 @@ class Track {
         this.id = id;
         this.trackInfo = trackInfo;
         this.trackRef = firebase.database().ref("/tracks/" + mixer.playroomId + "/" + id);
+        this.likesRef = firebase.database().ref("/likes/" + id);
+        this.playerRef = firebase.database().ref("/users/" + trackInfo.player);
         this.mixer = mixer;
         var context = this.context = mixer.context;
         this.buffer = buffer;
@@ -527,8 +564,11 @@ class Track {
 
 
         //firebase event
-        this.trackRef.child("likes").on("value", snapshot=>{
+        this.likesRef.on("value", snapshot=>{
             self.updateLikes(snapshot.val());
+        });
+        this.playerRef.on("value", snapshot=>{
+            self.updatePlayer(snapshot.val());
         });
     }
     start(when, offset) {
@@ -555,7 +595,14 @@ class Track {
 
 
     updateLikes(likes){
+        if (!likes) likes = 0;
         this.$heart.find("div.favo>div").text(likes);
+    }
+
+    updatePlayer(player){
+        this.$el.find("div.displayName").text(player.displayName);
+        this.$el.find("div.photoURL>img").attr("src", player.photoURL);
+        this.$el.find("div.level").text(player.level);
     }
 
     /**
@@ -611,11 +658,14 @@ class Track {
     increment() {
         const self = this;
         console.log("increment likes");
-        this.trackRef.child("likes").transaction(likes=>{
+        this.likesRef.transaction(likes=>{
             console.log("increment likes %o", likes);
             if(likes != null){
                 likes++;
+            }else{
+                likes = 1;
             }
+
             console.log(likes);
             return likes;
         }).then((resolved)=>{
@@ -709,7 +759,6 @@ class RecordDeck {
     }
     complete() {
         var self = this;
-        this.mixer.metronome.play();
         console.log("complete");
         this.mixer.stop();
         this.stop();
@@ -834,11 +883,14 @@ class RecordDeck {
         $(this.mixer.metronome).off("tick");
         var measures = 0
         $(this.mixer.metronome).on("tick", function (evt, data) {
-            console.log(data);
+            console.log(measures, data);
             if (data.beat === 0) {
                 measures += 1;
             }
-            if (measures === 3 && !self.mixer.playing) {
+            if (measures <= 2 && !self.mixer.playing){
+                console.log("precount");
+                self.mixer.lcd.write2Display("letters", 3-measures + " MEASURES TO REC   " + "    ".slice(4-(data.beat/4)) + "+");
+            }else if (measures === 3 && !self.mixer.playing) {
                 console.log("play start");
                 self.mixer.play(data.time);
                 self.trimOffset = data.time - self._precountTime;
@@ -848,6 +900,7 @@ class RecordDeck {
     }
     stop() {
         this.audioRecorder.stop();
+        this.mixer.metronome.play();
     }
     resizeAnalyzer() {
         var canvas = document.getElementById("rec_analyser");
@@ -960,7 +1013,7 @@ class Metronome {
         this.startTime;              // The start time of the entire sequence.
         this.throughoutNote;         // The throughout sum 16-beats are hit.
         this.current16thNote;        // What note is currently last scheduled?
-        this.tempo = 120.0;          // tempo (in beats per minute)
+        this.tempo = 120;          // tempo (in beats per minute)
         this.lookahead = 25.0;       // How frequently to call scheduling function 
         //(in milliseconds)
         this.scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)

@@ -13,9 +13,16 @@
       }
     },
     "tracks": {
+      "$playroom": {
+        "$track": {
+          ".write": "auth != null && (!data.exists() || data.child('player').val() == auth.uid)",
+          ".validate": "newData.child('player').val() == auth.uid"
+        }
+      }
+    },
+    "likes": {
       "$track": {
-        ".write": "auth != null && (!data.exists() || data.child('player').val() == auth.uid)",
-        ".validate": "newData.child('player').val() == auth.uid"
+         ".write": true
       }
     }
   }
