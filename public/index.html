@@ -61,9 +61,7 @@
         <div id="page01_home" class="container">
         </div>
         <div id="page02_listrooms" class="container" style="display:none">
-            <div class="row">
-                <div class="col s12 m6 l4 playrooms-container">
-                </div>
+            <div class="row playrooms-container">
             </div>
         </div>
         <div id="page03_playroom" class="container" style="display:none">
@@ -252,14 +250,16 @@
 
     <!--テンプレート-->
     <template id="tmpl-playroom-card">
-        <div class="card">
-            <div class="card-image">
-                <img src="https://source.unsplash.com/random/640x400">
-                <span class="card-title">${title}</span>
-                <a class="btn-floating halfway-fab waves-effect waves-light red"><i class="material-icons">add</i></a>
-            </div>
-            <div class="card-content">
-                <p>${description}</p>
+        <div class="col s12 m6 l4 ">
+            <div class="card">
+                <div class="card-image">
+                    <img src="${playroom.artwork}">
+                    <span class="card-title">${playroom.title}</span>
+                    <a class="btnToRoom btn-floating halfway-fab waves-effect waves-light blue lighten-1" data-roomid=${id}><i class="material-icons">device_hub</i></a>
+                </div>
+                <div class="card-content">
+                    <p>${playroom.description}</p>
+                </div>
             </div>
         </div>
     </template>
@@ -267,7 +267,7 @@
         <div class="musicinfo row valign-wrapper nomargin">
             <div class="col s12 center">
                 <h5>
-                    課題曲: ${title}
+                    課題曲: ${title} (${duration} sec)
                 </h5>
             </div>
         </div>
