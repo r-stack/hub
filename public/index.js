@@ -126,6 +126,21 @@ class HubApp extends App{
     }
     listrooms(){
         console.log("PAGE: PLAYROOM LIST", arguments);
+
+
+        //clear page
+        $(".playrooms-container").empty();
+        firebase.database().ref("/playrooms").once("value", snapshot=>{
+            var playrooms = snapshot.val();
+            console.log("search playrooms ", playrooms);
+            for(let roomId in playrooms){
+
+                $("#tmpl-playroom-card")
+                    .tmpl({id:roomId, playroom:playrooms[roomId]})
+                    .appendTo($(".playrooms-container"));
+            }
+        });
+
         //show listrooms page
         this.showPage("listrooms");
     }
@@ -900,7 +915,7 @@ class RecordDeck {
     }
     stop() {
         this.audioRecorder.stop();
-        this.mixer.metronome.play();
+        this.mixer.metronome.stop();
     }
     resizeAnalyzer() {
         var canvas = document.getElementById("rec_analyser");
@@ -1102,17 +1117,22 @@ class Metronome {
     }
 
     play() {
-        this.isPlaying = !this.isPlaying;
+        if (!this.isPlaying) { // start playing
+            this.current16thNote = 0;
+            this.throughoutNote = 0;
+            this.nextNoteTime = this.context.currentTime;
+            this.timerWorker.postMessage("start");
+            this.isPlaying = true;
+        }
+    }
 
+    stop(){
         if (this.isPlaying) { // start playing
             this.current16thNote = 0;
             this.throughoutNote = 0;
             this.nextNoteTime = this.context.currentTime;
             this.timerWorker.postMessage("start");
-            return "stop";
-        } else {
-            this.timerWorker.postMessage("stop");
-            return "play";
+            this.isPlaying = false;
         }
     }
 
