@@ -92,6 +92,17 @@ body{
     font-size: 60px;
 }
 
+.rec-modal {
+    max-height: -webkit-calc(100% - 64px) !important;
+    max-height: calc(100% - 64px) !important;
+    height: -webkit-calc(100% - 64px) !important;
+    height: calc(100% - 64px) !important;
+}
+
+.modal-overlay {
+    opacity: 0 !important;
+}
+
 
 
 /**************************
