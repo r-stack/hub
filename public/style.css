@@ -80,6 +80,17 @@ body{
     transform: rotate(60deg);
 }
 
+.metronome-counter {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 30px;
+    margin: 0 auto;
+    z-index: 10;
+    text-align: left;
+    width: 40px;
+    font-size: 60px;
+}
 
 
 
