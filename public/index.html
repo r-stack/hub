@@ -61,6 +61,10 @@
         <div id="page01_home" class="container">
         </div>
         <div id="page02_listrooms" class="container" style="display:none">
+            <div class="row">
+                <div class="col s12 m6 l4 playrooms-container">
+                </div>
+            </div>
         </div>
         <div id="page03_playroom" class="container" style="display:none">
             <div class="musicinfo row valign-wrapper nomargin">
@@ -246,7 +250,19 @@
     </div>
 
 
-
+    <!--テンプレート-->
+    <template id="tmpl-playroom-card">
+        <div class="card">
+            <div class="card-image">
+                <img src="https://source.unsplash.com/random/640x400">
+                <span class="card-title">${title}</span>
+                <a class="btn-floating halfway-fab waves-effect waves-light red"><i class="material-icons">add</i></a>
+            </div>
+            <div class="card-content">
+                <p>${description}</p>
+            </div>
+        </div>
+    </template>
     <template id="tmpl-playroom">
         <div class="musicinfo row valign-wrapper nomargin">
             <div class="col s12 center">
