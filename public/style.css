@@ -36,6 +36,7 @@ body{
     height:24px;
     background-image:url(img/favo.svg);
     background-size:100%;
+    cursor: pointer;
 }
 
 .favo div{
@@ -78,3 +79,14 @@ body{
 .right-60deg{
     transform: rotate(60deg);
 }
+
+
+
+
+/**************************
+ * for page02_listrooms
+ **************************/
+
+ #page02_listrooms .card .card-image img {
+     min-height: 120px;
+ }

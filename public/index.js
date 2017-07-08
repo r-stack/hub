@@ -31,15 +31,16 @@ class App{
     }
     start(){
         //popstate
-        window.addEventListener("popstate", this.__checkUrl, false); 
+        window.addEventListener("popstate", this.__checkUrl.bind(this), false); 
         this.loadUrl(this.location.pathname);
     }
 
     stop(){
-        window.removeEventListener("popstate", this.__checkUrl, false)
+        window.removeEventListener("popstate", this.__checkUrl.bind(this), false)
     }
 
     navigate(fragment, options){
+        options = options||{};
         if(options.replace){
             this.history.replaceState({}, document.title, fragment);
         }else{
@@ -67,8 +68,10 @@ class App{
         return this.$current;
     }
 
-    __checkUrl(){
-        console.log("__checkUrl");
+    __checkUrl(evt){
+        console.log("__checkUrl: %o", evt);
+        const current = this.location.pathname;
+        this.loadUrl(current);
     }
 }
 class HubApp extends App{
@@ -126,10 +129,10 @@ class HubApp extends App{
     }
     listrooms(){
         console.log("PAGE: PLAYROOM LIST", arguments);
-
+        const self = this;
 
         //clear page
-        $(".playrooms-container").empty();
+        const $roomscontainer = $(".playrooms-container").empty();
         firebase.database().ref("/playrooms").once("value", snapshot=>{
             var playrooms = snapshot.val();
             console.log("search playrooms ", playrooms);
@@ -137,8 +140,13 @@ class HubApp extends App{
 
                 $("#tmpl-playroom-card")
                     .tmpl({id:roomId, playroom:playrooms[roomId]})
-                    .appendTo($(".playrooms-container"));
+                    .appendTo($roomscontainer);
             }
+            //dom event for transition
+            $roomscontainer.on("click", "a.btnToRoom", evt=>{
+                self.navigate("/playrooms/" + $(evt.currentTarget).attr("data-roomid"));
+            });
+            
         });
 
         //show listrooms page
@@ -324,10 +332,18 @@ class Mixer {
         const id = playroomId;
         const d = $.Deferred();
         let self = this;
+
+        
         this.lcd.write2Display("lettersRL01", "LOADING.....");
         firebase.database().ref("/playrooms/"+id).once("value", snap=>{
             let playroom = snap.val();
             //show playroom page
+            if(this.playing) this.stop();
+            // clear tracks
+            for (let tkey in this.tracks){
+                delete this.tracks["tkey"];
+            }
+            console.log("tracks clean???",this.tracks);
             this.playroomId = id;
             this.playroom = playroom;
             this.musicTitle = playroom.title;
@@ -342,13 +358,20 @@ class Mixer {
                 console.log("value: /tracks/" + id);
                 let tracks = self._tracks = snap_tracks.val();
                 console.log(tracks);
+                let resolves = [];
                 for(let key in tracks){
-                    self.loadAudioBuffer(key, tracks[key]);
+                    resolves.push(self.loadAudioBuffer(key, tracks[key]));
                 }
 
 
-                self.lcd.write2Display("letters", playroom.title);
-                d.resolve();
+                $.when.apply($, resolves).done(res=>{
+                    self.lcd.clearDisplay();
+                    self.lcd.write2Display("letters", playroom.title);
+                    d.resolve();
+                }).fail(res=>{
+                    d.resolve();
+                });
+                
             });
         });
         return d;
