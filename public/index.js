@@ -1131,7 +1131,7 @@ class Metronome {
             this.current16thNote = 0;
             this.throughoutNote = 0;
             this.nextNoteTime = this.context.currentTime;
-            this.timerWorker.postMessage("start");
+            this.timerWorker.postMessage("stop");
             this.isPlaying = false;
         }
     }
