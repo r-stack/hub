@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Welcome to hub</title>
 
 
@@ -13,6 +12,7 @@
     <script src="/lib/webcomponentsjs/webcomponents-lite.min.js"></script>
     <link rel="import" href="/lib/polymer/polymer.html">
     <link rel="import" href="/lib/webaudio-controls/webaudio-controls.html">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, user-scalable=no">
 </head>
 
 <body>
@@ -22,7 +22,7 @@
                 <img src="/img/hub_logo_200.png" alt="Hub" class="responsive-img title">
                 <ul id="nav-mobile" class="right">
                     <li>
-                        <div class="">
+                        <div class="hide-on-small-only">
                             <canvas id="mixer_lcd" style="margin-top:2px"></canvas>
                         </div>
                     </li>
@@ -43,7 +43,7 @@
                         </div>
                     </li>
                     <li>
-                        <div class="">
+                        <div class="hide-on-med-and-down">
                             <a id="main_stop" class="btn-floating btn-small waves-effect waves-light amber"><i class="material-icons">stop</i></a>
                         </div>
                     </li>
@@ -60,7 +60,7 @@
     <main style="clear:both">
         <div id="page01_home" class="container">
         </div>
-        <div id="page02_listrooms" class="container" style="display:none">
+        <div id="page02_listrooms" class="" style="display:none">
             <div class="row playrooms-container">
             </div>
         </div>
