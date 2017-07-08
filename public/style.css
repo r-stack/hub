@@ -36,6 +36,7 @@ body{
     height:24px;
     background-image:url(img/favo.svg);
     background-size:100%;
+    cursor: pointer;
 }
 
 .favo div{
