@@ -69,7 +69,7 @@ class App{
     }
 
     __checkUrl(evt){
-        console.log("__checkUrl: %o", evt);
+        console.log("__checkUrl: %o", evt, this.location.pathname);
         const current = this.location.pathname;
         this.loadUrl(current);
     }
@@ -100,7 +100,7 @@ class HubApp extends App{
 
     init(){
         //initialize router settings
-        this.route(/^$/, this.home);
+        this.route(/^\/$/, this.home);
         this.route(/^\/playrooms\/$/, this.listrooms);
         this.route(/^\/playrooms\/(\S+)$/, this.playroom);
 
@@ -121,11 +121,16 @@ class HubApp extends App{
 
     home(){
         console.log("home");
+        const self = this;
         // init application message
         this.lcd.init('mixer_lcd', "LET'S PLAY.", true);
 
         //show home page
         this.showPage("home");
+
+        setTimeout(function(){
+            self.navigate("/playrooms/");
+        }, 6000);
     }
     listrooms(){
         console.log("PAGE: PLAYROOM LIST", arguments);
@@ -137,16 +142,15 @@ class HubApp extends App{
             var playrooms = snapshot.val();
             console.log("search playrooms ", playrooms);
             for(let roomId in playrooms){
-
                 $("#tmpl-playroom-card")
                     .tmpl({id:roomId, playroom:playrooms[roomId]})
                     .appendTo($roomscontainer);
             }
             //dom event for transition
+            $roomscontainer.off("click");
             $roomscontainer.on("click", "a.btnToRoom", evt=>{
                 self.navigate("/playrooms/" + $(evt.currentTarget).attr("data-roomid"));
             });
-            
         });
 
         //show listrooms page
@@ -329,6 +333,7 @@ class Mixer {
      * 既存のロード済みトラックを破棄して新しくPlayroomを構築します。
      */
     load(playroomId){
+        console.log("Mixer.load");
         const id = playroomId;
         const d = $.Deferred();
         let self = this;
