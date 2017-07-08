@@ -645,7 +645,7 @@ class Track {
     updatePlayer(player){
         this.$el.find("div.displayName").text(player.displayName);
         this.$el.find("div.photoURL>img").attr("src", player.photoURL);
-        this.$el.find("div.level").text(player.level);
+        this.$el.find("div.level").text("👑" + (player.level || "0"));
     }
 
     /**
