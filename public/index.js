@@ -214,7 +214,7 @@ class AuthView {
         let ref = firebase.database().ref("/users/" + user.uid).transaction(current=>{
             if(!current){
                 current = {
-                    level: 0
+                    level: 1
                 };
             }
             current.photoURL = user.photoURL;
