@@ -924,19 +924,24 @@ class RecordDeck {
         this._precountTime = this.audioContext.currentTime;
         var current = this.mixer.context.currentTime;
         $(this.mixer.metronome).off("tick");
-        var measures = 0
+        let measures = 3; // default precount
         $(this.mixer.metronome).on("tick", function (evt, data) {
             console.log(measures, data);
-            if (data.beat === 0) {
-                measures += 1;
-            }
-            if (measures <= 2 && !self.mixer.playing){
-                console.log("precount");
-                self.mixer.lcd.write2Display("letters", 3-measures + " MEASURES TO REC   " + "    ".slice(4-(data.beat/4)) + "+");
-            }else if (measures === 3 && !self.mixer.playing) {
-                console.log("play start");
-                self.mixer.play(data.time);
-                self.trimOffset = data.time - self._precountTime;
+            if (!self.mixer.playing) {
+                if (data.beat === 0) {
+                    measures -= 1;
+                    this.counter.text(measures);
+                }
+                if (measures > 0){
+                    console.log("precount");
+                    self.mixer.lcd.write2Display("letters", measures + " MEASURES TO REC   " + "    ".slice(4-(data.beat/4)) + "+");
+                    this.counter.text(measures + ".".repeat(data.beat/4));
+                }else if (measures === 0) {
+                    console.log("play start");
+                    self.mixer.play(data.time);
+                    self.trimOffset = data.time - self._precountTime;
+                    this.counter.text("");
+                }
             }
         });
         this.mixer.metronome.play();
@@ -1086,6 +1091,8 @@ class Metronome {
         this.needle = $("#metronome_needle");
         this.needleToLeft = true;
         this.needle.css({ "transition": "transform " + 60.0 / this.tempo + "s linear" });
+        
+        this.counter = $("#metronome_counter");
     }
     nextNote() {
         // Advance current note and time by a 16th note...
