@@ -100,7 +100,7 @@ class HubApp extends App{
 
     init(){
         //initialize router settings
-        this.route(/^$/, this.home);
+        this.route(/^\/$/, this.home);
         this.route(/^\/playrooms\/$/, this.listrooms);
         this.route(/^\/playrooms\/(\S+)$/, this.playroom);
 
@@ -121,11 +121,16 @@ class HubApp extends App{
 
     home(){
         console.log("home");
+        const self = this;
         // init application message
         this.lcd.init('mixer_lcd', "LET'S PLAY.", true);
 
         //show home page
         this.showPage("home");
+
+        setTimeout(function(){
+            self.navigate("/playrooms/");
+        }, 6000);
     }
     listrooms(){
         console.log("PAGE: PLAYROOM LIST", arguments);
