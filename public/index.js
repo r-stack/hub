@@ -139,7 +139,7 @@ class HubApp extends App{
         //clear page
         const $roomscontainer = $(".playrooms-container").empty();
         firebase.database().ref("/playrooms").once("value", snapshot=>{
-            var playrooms = snapshot.val();
+            const playrooms = snapshot.val();
             console.log("search playrooms ", playrooms);
             for(let roomId in playrooms){
                 $("#tmpl-playroom-card")
@@ -157,7 +157,7 @@ class HubApp extends App{
         this.showPage("listrooms");
     }
     playroom(path, id){
-        var self = this;
+        const self = this;
         console.log("PAGE: PLAYROOM DETAIL", arguments);
         console.log(this);
         this.mixer.load(id).done(()=>self.showPage('playroom'));
@@ -174,7 +174,7 @@ class AuthView {
     }
 
     init(){
-        var self = this;
+        const self = this;
 
         this.$el.on("click", "#main_signin", function(){
             console.log("start login process");
@@ -234,22 +234,22 @@ class AuthView {
         });
     }
     login() {
-        var self = this;
-        var provider = new firebase.auth.GithubAuthProvider();
+        const self = this;
+        const provider = new firebase.auth.GithubAuthProvider();
         firebase.auth().signInWithPopup(provider).then(function (result) {
             // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-            var token = result.credential.accessToken;
+            const token = result.credential.accessToken;
             // The signed-in user info.
-            var user = result.user;
+            const user = result.user;
             self.user = user;
         }).catch(function (error) {
             // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
+            const errorCode = error.code;
+            const errorMessage = error.message;
             // The email of the user's account used.
-            var email = error.email;
+            const email = error.email;
             // The firebase.auth.AuthCredential type that was used.
-            var credential = error.credential;
+            const credential = error.credential;
             alert("Login Failed.");
         });
     }
@@ -283,7 +283,7 @@ class Mixer {
         this._startTime = 0;
         this._offsetTime = 0
         this._playing = false;
-        var self = this;
+        const self = this;
 
         this.metronome = new Metronome(this);
         this.recorddeck = new RecordDeck(this);
@@ -293,7 +293,7 @@ class Mixer {
 
         //dom event for global nav
         $("#main_vol").on("change", (e) => {
-            var v = e.target.value;
+            const v = e.target.value;
             self.gainNode.gain.value = v / 100;
         });
         this.$btnPlay = $("#main_play").on("click", (e) => {
@@ -393,11 +393,11 @@ class Mixer {
 
     play(startTime) {
         if (this.playing) return;
-        var _startTime = startTime;
+        let _startTime = startTime;
         if (_startTime === undefined) {
             _startTime = this.context.currentTime + 0.1;
         }
-        var offsetTime = this._offsetTime;
+        const offsetTime = this._offsetTime;
         $.each(this.tracks, (key, track) => track.start(_startTime, offsetTime));
         this._startTime = _startTime;
         this._playing = true;
@@ -433,7 +433,7 @@ class Mixer {
         this.$btnStop.addClass("disabled");
     }
     rec(track_id) {
-        var self = this;
+        const self = this;
         if (this.playing) return;
         this._offsetTime = 0;
         this.recording_track = track_id;
@@ -463,13 +463,13 @@ class Mixer {
         this._lcd_rafId = window.requestAnimationFrame(this._drawLCD.bind(this));
     }
     _drawLCD() {
-        var offset = this.offset;
+        const offset = this.offset;
         if (offset >= 0) {
-            var sei = Math.floor(this.offset * 100);
-            var sec = Math.floor(sei / 100);
-            var deci = sei % 100;
-            var fff = "                                    " + sec + "." + ("00" + deci).slice(-2);
-            var dispoffset = fff.slice(this.musicTitle.length - 36 + 1);
+            const sei = Math.floor(this.offset * 100);
+            const sec = Math.floor(sei / 100);
+            const deci = sei % 100;
+            const fff = "                                    " + sec + "." + ("00" + deci).slice(-2);
+            const dispoffset = fff.slice(this.musicTitle.length - 36 + 1);
             this.lcd.write2Display("letters", this.musicTitle + " " + dispoffset);
         }
         if(this.playroom){
@@ -505,7 +505,7 @@ class Mixer {
     addTrack(id, trackInfo, buf) {
         const container = this.$el.find(".instrument[data-instrument="+trackInfo.instrument+"] .with-header");
         if(container.length){
-            var track = new Track(id, this, buf, trackInfo, container);
+            const track = new Track(id, this, buf, trackInfo, container);
             track.output.connect(this.gainNode);
             this.tracks[id] = track;
             return track;
@@ -519,9 +519,9 @@ class Mixer {
         delete this.tracks[id];
     }
     loadAudioBuffer(id, trackInfo) {
-        var target = trackInfo.sound;
-        var self = this;
-        var url = target;
+        const target = trackInfo.sound;
+        const self = this;
+        const url = target;
         console.log(url);
         if(!url){
             //まだからのSound
@@ -529,13 +529,13 @@ class Mixer {
             this.addTrack(id, trackInfo, buf);
             return; 
         }
-        var request = new XMLHttpRequest();
+        const request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer'; // ArrayBufferとしてロード
         request.send();
 
 
-        var d = new $.Deferred;
+        const d = new $.Deferred;
         request.onload = function () {
             console.log(self);
             // オーディオデータが取得できた場合、contextにArrayBufferを渡し、decodeさせる
@@ -553,16 +553,16 @@ class Mixer {
 
 class Track {
     constructor(id, mixer, buffer, trackInfo, container) {
-        var self = this;
+        const self = this;
         this.id = id;
         this.trackInfo = trackInfo;
         this.trackRef = firebase.database().ref("/tracks/" + mixer.playroomId + "/" + id);
         this.likesRef = firebase.database().ref("/likes/" + id);
         this.playerRef = firebase.database().ref("/users/" + trackInfo.player);
         this.mixer = mixer;
-        var context = this.context = mixer.context;
+        const context = this.context = mixer.context;
         this.buffer = buffer;
-        var gainNode = this.gainNode = context.createGain();
+        const gainNode = this.gainNode = context.createGain();
 
         this.enabled = false;
         console.log(container);
@@ -576,7 +576,7 @@ class Track {
         this.$el = $(".track" + id);
         this.elToggle = document.getElementById("track" + id + "_toggle");
         this.elToggle.addEventListener('change', (e) => {
-            var v = e.target.value;
+            const v = e.target.value;
             self.enabled = !!v;
             if (mixer.playing) {
                 if (self.enabled) {
@@ -589,7 +589,7 @@ class Track {
         this.elVol = document.getElementById("track" + id + "_vol");
         gainNode.gain.value = this.elVol.value / 100;
         this.elVol.addEventListener('change', (e) => {
-            var v = e.target.value;
+            const v = e.target.value;
             gainNode.gain.value = v / 100;
         });
 
@@ -617,7 +617,7 @@ class Track {
     start(when, offset) {
         if (!this.enabled) return;
         if (this.source) this.stop();
-        var source = this.source = this.context.createBufferSource();
+        const source = this.source = this.context.createBufferSource();
         source.buffer = this.buffer;
         source.connect(this.input);
         source.start(when, offset);
@@ -664,7 +664,7 @@ class Track {
         const self = this;
         this.buffer = buffer;
 
-        var wavref = firebase.storage().ref("/tracks/" + this.id + ".wav");
+        const wavref = firebase.storage().ref("/tracks/" + this.id + ".wav");
         wavref.put(wavblob).then(()=>{
             console.log("sound save into storage");
             wavref.getDownloadURL().then((url)=>{
@@ -750,9 +750,9 @@ class VolumeIndicator {
     _draw(time) {
 
 
-        var freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
+        const freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
         this.analyserNode.getByteFrequencyData(freqByteData);
-        var sum = freqByteData.reduce((a, b) => a + b, 0);
+        const sum = freqByteData.reduce((a, b) => a + b, 0);
         this.volume = sum / freqByteData.length / 255 * 100;
 
         this.analyserContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -777,7 +777,7 @@ class RecordDeck {
         this.mixer = mixer;
         this.audioContext = mixer.context;
         this.resizeAnalyzer();
-        var canvas = document.getElementById("rec_analyser");
+        const canvas = document.getElementById("rec_analyser");
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
         this.analyserContext = canvas.getContext('2d');
@@ -801,20 +801,20 @@ class RecordDeck {
         this.record();
     }
     complete() {
-        var self = this;
+        const self = this;
         console.log("complete");
         this.mixer.stop();
         this.stop();
         this.audioRecorder.getBuffer((buf) => {
             console.log(buf);
-            var trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
+            const trimIndex = Math.round(self.trimOffset * self.audioContext.sampleRate);
             if (buf[0].length - trimIndex > 0) {
-                var ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
+                const ab = self.audioContext.createBuffer(2, buf[0].length - trimIndex, self.audioContext.sampleRate);
                 console.log(ab);
-                for (var channel = 0; channel < 2; channel++) {
+                for (let channel = 0; channel < 2; channel++) {
                     // 実際のデータの配列を得る
-                    var nowBuffering = ab.getChannelData(channel);
-                    for (var i = 0; i < nowBuffering.length; i++) {
+                    const nowBuffering = ab.getChannelData(channel);
+                    for (let i = 0; i < nowBuffering.length; i++) {
                         // Math.random()は[0; 1.0]である
                         // 音声は[-1.0; 1.0]である必要がある
                         nowBuffering[i] = buf[channel][trimIndex + i];
@@ -833,11 +833,11 @@ class RecordDeck {
     encodeWAV(numChannels, audiobuf) {
 
         function interleave(inputL, inputR) {
-            var length = inputL.length + inputR.length;
-            var result = new Float32Array(length);
+            const length = inputL.length + inputR.length;
+            const result = new Float32Array(length);
 
-            var index = 0,
-                inputIndex = 0;
+            let index = 0;
+            let inputIndex = 0;
 
             while(index < length) {
                 result[index++] = inputL[inputIndex];
@@ -847,14 +847,15 @@ class RecordDeck {
             return result;
         }
         function floatTo16BitPCM(output, offset, input) {
-            for(var i = 0; i < input.length; i++ , offset += 2) {
-                var s = Math.max(-1, Math.min(1, input[i]));
+            let s;
+            for(let i = 0; i < input.length; i++ , offset += 2) {
+                s = Math.max(-1, Math.min(1, input[i]));
                 output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
             }
         }
 
         function writeString(view, offset, string) {
-            for(var i = 0; i < string.length; i++) {
+            for(let i = 0; i < string.length; i++) {
                 view.setUint8(offset + i, string.charCodeAt(i));
             }
         }
@@ -866,8 +867,8 @@ class RecordDeck {
         }else{
             samples = audiobuf.getChannelData(0);
         }
-        var buffer = new ArrayBuffer(44 + samples.length * 2);
-        var view = new DataView(buffer);
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
 
         /* RIFF identifier */
         writeString(view, 0, 'RIFF');
@@ -918,11 +919,11 @@ class RecordDeck {
         this.$modal.modal("close");
     }
     record() {
-        var self = this;
+        const self = this;
         this.audioRecorder.clear();
         this.audioRecorder.record();
         this._precountTime = this.audioContext.currentTime;
-        var current = this.mixer.context.currentTime;
+        const current = this.mixer.context.currentTime;
         $(this.mixer.metronome).off("tick");
         let measures = 3; // default precount
         $(this.mixer.metronome).on("tick", function (evt, data) {
@@ -951,8 +952,8 @@ class RecordDeck {
         this.mixer.metronome.stop();
     }
     resizeAnalyzer() {
-        var canvas = document.getElementById("rec_analyser");
-        var wrapper = canvas.parentElement;
+        const canvas = document.getElementById("rec_analyser");
+        const wrapper = canvas.parentElement;
         $(canvas).attr('width', $(wrapper).width());
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
@@ -969,27 +970,28 @@ class RecordDeck {
 
         // analyzer draw code here
         {
-            var SPACING = 3;
-            var BAR_WIDTH = 1;
-            var numBars = Math.round(this.canvasWidth / SPACING);
-            var freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
+            const SPACING = 3;
+            const BAR_WIDTH = 1;
+            const numBars = Math.round(this.canvasWidth / SPACING);
+            const freqByteData = new Uint8Array(this.analyserNode.frequencyBinCount);
 
             this.analyserNode.getByteFrequencyData(freqByteData);
 
             this.analyserContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.analyserContext.fillStyle = '#F6D565';
             this.analyserContext.lineCap = 'round';
-            var multiplier = this.analyserNode.frequencyBinCount / numBars;
-            var rate = this.canvasHeight / 255;
+            const multiplier = this.analyserNode.frequencyBinCount / numBars;
+            const rate = this.canvasHeight / 255;
             // Draw rectangle for each frequency bin.
-            for (var i = 0; i < numBars; ++i) {
-                var magnitude = 0;
-                var offset = Math.floor(i * multiplier);
+            let i, j, magnitude, offset, magnitude2;
+            for (i = 0; i < numBars; ++i) {
+                magnitude = 0;
+                offset = Math.floor(i * multiplier);
                 // gotta sum/average the block, or we miss narrow-bandwidth spikes
-                for (var j = 0; j < multiplier; j++)
+                for (j = 0; j < multiplier; j++)
                     magnitude += freqByteData[offset + j];
                 magnitude = magnitude / multiplier * rate;
-                var magnitude2 = freqByteData[i * multiplier];
+                magnitude2 = freqByteData[i * multiplier];
                 this.analyserContext.fillStyle = "hsl( " + Math.round((i * 360) / numBars) + ", 100%, 50%)";
                 this.analyserContext.fillRect(i * SPACING, this.canvasHeight, BAR_WIDTH, -magnitude);
             }
@@ -1001,11 +1003,11 @@ class RecordDeck {
 
     gotStream(stream) {
         this.stream = stream;
-        var inputPoint = this.audioContext.createGain();
+        const inputPoint = this.audioContext.createGain();
 
         // Create an AudioNode from the stream.
-        var realAudioInput = this.audioContext.createMediaStreamSource(stream);
-        var audioInput = realAudioInput;
+        const realAudioInput = this.audioContext.createMediaStreamSource(stream);
+        const audioInput = realAudioInput;
         audioInput.connect(inputPoint);
 
 
@@ -1015,7 +1017,7 @@ class RecordDeck {
 
         this.audioRecorder = new Recorder(inputPoint);
 
-        var zeroGain = this.audioContext.createGain();
+        const zeroGain = this.audioContext.createGain();
         zeroGain.gain.value = 0.0;
         inputPoint.connect(zeroGain);
         zeroGain.connect(this.audioContext.destination);
@@ -1076,7 +1078,7 @@ class Metronome {
         this.timerWorker = null;     // The Web Worker used to fire timer messages
 
         this.timerWorker = new Worker("/metronomeworker.js");
-        var self = this;
+        const self = this;
         this.timerWorker.onmessage = function (e) {
             if (e.data == "tick") {
                 // console.log("tick!");
@@ -1096,7 +1098,7 @@ class Metronome {
     }
     nextNote() {
         // Advance current note and time by a 16th note...
-        var secondsPerBeat = 60.0 / this.tempo;    // Notice this picks up the CURRENT 
+        const secondsPerBeat = 60.0 / this.tempo;    // Notice this picks up the CURRENT 
         // tempo value to calculate beat length.
         this.nextNoteTime += 0.25 * secondsPerBeat;    // Add beat length to last beat time
 
@@ -1128,7 +1130,7 @@ class Metronome {
         // }
 
         // create an oscillator
-        var osc = this.context.createOscillator();
+        const osc = this.context.createOscillator();
         osc.connect(this.context.destination);
         if (beatNumber % 16 === 0)    // beat 0 == high pitch
             osc.frequency.value = 880.0;
